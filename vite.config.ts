@@ -29,4 +29,9 @@ export default defineConfig({
 					: {},
 		}),
 	],
+	build: {
+		rollupOptions: {
+			external: ["electron-router-dom"],
+		},
+	},
 });
