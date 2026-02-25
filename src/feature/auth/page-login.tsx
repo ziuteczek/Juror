@@ -6,8 +6,10 @@ export default function Login() {
 			<input type="email" name="email" id="email" />
 			<label htmlFor="">Password</label>
 			<input type="password" name="email" id="email" />
-			<Link to={"/galery"}>log in</Link>
-			<Link to={"/offline-galery"}>offline mode</Link>
+			<Link to={"/"} className="cursor-not-allowed">
+				log in
+			</Link>
+			<Link to={"/offline-gallery"}>Offline mode</Link>
 		</>
 	);
 }

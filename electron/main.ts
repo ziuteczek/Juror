@@ -1,7 +1,9 @@
-import { app, BrowserWindow } from "electron";
+import "dotenv/config";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 
 const require = createRequire(import.meta.url);
@@ -39,6 +41,8 @@ function createWindow() {
 		},
 	});
 
+	win.maximize();
+
 	registerRoute({
 		id: "main",
 		browserWindow: win,
@@ -53,7 +57,6 @@ function createWindow() {
 			new Date().toLocaleString(),
 		);
 	});
-
 
 	if (VITE_DEV_SERVER_URL) {
 		win.webContents.openDevTools({ mode: "detach" });
@@ -76,6 +79,75 @@ app.on("activate", () => {
 	if (BrowserWindow.getAllWindows().length === 0) {
 		createWindow();
 	}
+});
+
+async function dirExists(dirPath: string): Promise<boolean> {
+	try {
+		await readdir(dirPath);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function getThumbnail(dirPath: string): Promise<string> {
+	try {
+		const files = await readdir(dirPath);
+		const photos = [
+			...files.filter(
+				(file) =>
+					file.toLocaleLowerCase().endsWith(".jpg") ||
+					file.toLocaleLowerCase().endsWith(".jpeg"),
+			),
+		].sort();
+
+		if (photos.length === 0) {
+			console.warn(`There are no photos in ${dirPath} gallery`);
+			return "";
+		}
+
+		const thumbnailPath = path.join(dirPath, photos[0]);
+		const thumbnailBase64 = await readFile(thumbnailPath, {
+			encoding: "base64",
+		});
+
+		return `data:image/jpeg;base64,${thumbnailBase64}`;
+	} catch (err) {
+		console.error(err);
+		return "";
+	}
+}
+
+// IPC handler for getting offline gallery data
+ipcMain.handle("get-offline-gallery-data", async () => {
+	const galleryFolderName = process.env.OFFLINE_GALLERY_DIR_NAME;
+
+	if (!galleryFolderName) {
+		throw new Error("Env variable OFFLINE_GALLERY_DIR_NAME not defined");
+	}
+
+	const picturesPath = app.getPath("pictures");
+	const jurorFolderPath = path.join(picturesPath, galleryFolderName);
+
+	if (!(await dirExists(jurorFolderPath))) {
+		await mkdir(jurorFolderPath);
+	}
+
+	const directoriesAndFiles = await readdir(jurorFolderPath, {
+		withFileTypes: true,
+	});
+
+	return Promise.all(
+		directoriesAndFiles
+			.filter((dir) => dir.isDirectory())
+			.map(async (dir) => ({
+				name: dir.name,
+				path: dir.parentPath,
+				thumbnail: await getThumbnail(
+					path.join(dir.parentPath, dir.name),
+				),
+			})),
+	);
 });
 
 app.whenReady().then(createWindow);

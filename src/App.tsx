@@ -1,6 +1,7 @@
 import { Route } from "react-router-dom";
 import { Router } from "./lib/electron-router-dom";
-import Login from "./feature/auth/login";
+import Login from "./feature/auth/page-login";
+import Gallery from "./feature/gallery/page";
 
 export default function App() {
 	return (
@@ -8,11 +9,8 @@ export default function App() {
 			main={
 				<>
 					<Route path="/" element={<Login />} index />
-					<Route path="/galery" element={<p>Online galery</p>} />
-					<Route
-						path="/offline-galery"
-						element={<p>galery offline</p>}
-					/>
+					<Route path="/gallery" element={<p>Online gallery</p>} />
+					<Route path="/offline-gallery" element={<Gallery />} />
 				</>
 			}
 		/>
