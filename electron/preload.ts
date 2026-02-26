@@ -23,7 +23,13 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	getOfflineGalleryData() {
 		return ipcRenderer.invoke("get-offline-gallery-data");
 	},
-
-	// You can expose other APTs you need here.
-	// ...
+	getOfflineAlbumPhotosList(albumPath: string) {
+		return ipcRenderer.invoke("get-offline-album-photos-list", albumPath);
+	},
+	getAlbumData(albumPath: string) {
+		return ipcRenderer.invoke("get-album-data", albumPath);
+	},
+	photoToBase64(photoPath: string) {
+		return ipcRenderer.invoke("photo-to-base-64", photoPath);
+	},
 });

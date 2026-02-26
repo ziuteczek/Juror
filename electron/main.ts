@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
+import ElectronStore from "electron-store";
+import { albumData } from "../src/feature/judgement/types";
 
 const require = createRequire(import.meta.url);
 // electron-router-dom expects CommonJS-style `require` in the main process.
@@ -35,7 +37,7 @@ let win: BrowserWindow | null;
 
 function createWindow() {
 	win = new BrowserWindow({
-		icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+		icon: path.join(process.env.VITE_PUBLIC!, "electron-vite.svg"),
 		webPreferences: {
 			preload: path.join(__dirname, "preload.mjs"),
 		},
@@ -107,16 +109,29 @@ async function getThumbnail(dirPath: string): Promise<string> {
 		}
 
 		const thumbnailPath = path.join(dirPath, photos[0]);
-		const thumbnailBase64 = await readFile(thumbnailPath, {
-			encoding: "base64",
-		});
-
-		return `data:image/jpeg;base64,${thumbnailBase64}`;
+		return photoToBase64(thumbnailPath);
 	} catch (err) {
 		console.error(err);
 		return "";
 	}
 }
+
+async function photoToBase64(photoPath: string): Promise<string> {
+	try {
+		const photoBase64 = await readFile(photoPath, {
+			encoding: "base64",
+		});
+
+		return `data:image/jpeg;base64,${photoBase64}`;
+	} catch (err) {
+		console.error(err);
+		return "";
+	}
+}
+
+ipcMain.handle("photo-to-base-64", async (_, photoPath: string) => {
+	return photoToBase64(photoPath);
+});
 
 // IPC handler for getting offline gallery data
 ipcMain.handle("get-offline-gallery-data", async () => {
@@ -148,6 +163,58 @@ ipcMain.handle("get-offline-gallery-data", async () => {
 				),
 			})),
 	);
+});
+
+ipcMain.handle(
+	"get-offline-album-photos-list",
+	//eslint-disable-next-line
+	async (_: any, albumPath: string) => {
+		try {
+			if (!(await dirExists(albumPath))) {
+				console.warn("Album with given path doesn't exists");
+				return [];
+			}
+			return await readdir(albumPath);
+		} catch (err) {
+			console.error(err);
+			return [];
+		}
+	},
+);
+//eslint-disable-next-line
+ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
+	try {
+		if (!(await dirExists(albumPath))) {
+			console.warn(
+				`Album path with given directory (${albumPath}) doesn't exists`,
+			);
+			return [];
+		}
+
+		const storage = new ElectronStore();
+		const albumTitle = path.basename(albumPath);
+
+		if (storage.has(albumTitle)) {
+			return storage.get(albumTitle) as albumData[];
+		}
+
+		const albumFiles = await readdir(albumPath, { withFileTypes: true });
+		const albumPhotos = albumFiles.filter(
+			(file) =>
+				(file.isFile() &&
+					file.name.toLocaleLowerCase().endsWith(".jpeg")) ||
+				file.name.toLocaleLowerCase().endsWith(".jpg"),
+		);
+		const albumData = albumPhotos.map((photo) => ({
+			title: photo.name,
+			path: path.join(albumPath, photo.name),
+			rating: null,
+		}));
+		return albumData;
+	} catch (err) {
+		console.error(err);
+		return [];
+	}
 });
 
 app.whenReady().then(createWindow);

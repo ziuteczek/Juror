@@ -27,5 +27,8 @@ interface Window {
 		getOfflineGalleryData(): Promise<
 			Array<{ name: string; path: string; thumbnail: string }>
 		>;
+		getOfflineAlbumPhotosList(albumPath: string): Promise<string[]>;
+		getAlbumData(albumPath: string): Promise<albumData[]>;
+		photoToBase64(photoPath: string): Promise<string>;
 	};
 }
