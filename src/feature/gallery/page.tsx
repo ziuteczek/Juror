@@ -17,13 +17,15 @@ export default function Gallery() {
 
 	return (
 		<>
+			<Link to={"/judgement?album=/home/stasio/Pictures/juror/drupa"}>
+				dupa
+			</Link>
 			{galleries.map((gallery) => (
 				<div key={gallery.name}>
 					<p>{gallery.name}</p>
 					<img src={gallery.thumbnail} alt="" />
 				</div>
 			))}
-			<Link to={"/judgement?album=/home/stasio/Pictures/juror/drupa"}>dupa</Link>
 		</>
 	);
 }
