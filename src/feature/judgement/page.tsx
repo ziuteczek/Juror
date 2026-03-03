@@ -4,14 +4,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import type { albumData, currPhotoData } from "./types";
 import getAlbumData from "./untils/get.album.data";
 import photoToBase64 from "./untils/photo.to.base64";
+import FinishModal from "./components/finish.modal";
 
 export type { albumData };
 
 export default function Judgement() {
 	const [albumData, setAlbumData] = useState<albumData[]>([]);
 	const [searchParams] = useSearchParams();
-	const naviate = useNavigate();
 	const albumTitle = searchParams.get("album");
+	const naviate = useNavigate();
 
 	const [currPhoto, setCurrPhoto] = useState<currPhotoData>({
 		index: -1,
@@ -125,6 +126,9 @@ export default function Judgement() {
 
 	return (
 		<>
+			{albumData.every((photo) => photo.rating) && (
+				<FinishModal photosCount={albumData.length} />
+			)}
 			<button onClick={() => nextPhoto()}>Następny</button>
 			<form>
 				{new Array(Number(import.meta.env.VITE_MAX_RATING))
