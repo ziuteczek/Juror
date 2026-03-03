@@ -1,10 +1,13 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import type { albumData, currPhotoData } from "./types";
 import getAlbumData from "./untils/get.album.data";
-import photoToBase64 from "./untils/photo.to.base64";
+
 import FinishModal from "./components/finish.modal";
+import JudgementImage from "./components/image";
+import { devMode } from "../../env";
+import SelectRating from "./components/select.rating";
 
 export type { albumData };
 
@@ -18,15 +21,6 @@ export default function Judgement() {
 		index: -1,
 		photoBase64: "",
 	});
-
-	const ratePhoto = (rating: number | null) =>
-		setAlbumData((prev) =>
-			prev.map((photo, photoIndex) =>
-				photoIndex === currPhoto.index
-					? { ...photo, rating }
-					: { ...photo },
-			),
-		);
 
 	const nextPhoto = () => {
 		if (albumData[currPhoto.index].rating) {
@@ -76,8 +70,11 @@ export default function Judgement() {
 					earliestSkippedPhotoDateEpoch,
 			);
 
-		console.log(unratedPhotoIndex);
-		console.log(earliestSkippedPhotoIndex);
+		if (devMode) {
+			console.log(unratedPhotoIndex);
+			console.log(earliestSkippedPhotoIndex);
+		}
+
 		if (unratedPhotoIndex !== -1) {
 			setCurrPhoto({
 				index: unratedPhotoIndex,
@@ -94,21 +91,9 @@ export default function Judgement() {
 			return;
 		}
 
-		//TODO: if there are no photos left
-		if (import.meta.env.DEV) {
+		if (devMode) {
 			console.log("They are no more photos left to rate");
 		}
-	}, [albumData, currPhoto.index]);
-
-	// When new photo is picked for rating
-	useEffect(() => {
-		if (currPhoto.index < 0 || !albumData[currPhoto.index]) {
-			return;
-		}
-
-		photoToBase64(albumData[currPhoto.index].path).then((img) =>
-			setCurrPhoto((old) => ({ ...old, photoBase64: img })),
-		);
 	}, [albumData, currPhoto.index]);
 
 	if (!albumTitle) {
@@ -120,38 +105,24 @@ export default function Judgement() {
 		return <div>Loading...</div>;
 	}
 
-	if (import.meta.env.DEV) {
+	if (devMode) {
 		console.log(albumData);
 	}
 
 	return (
 		<>
-			{albumData.every((photo) => photo.rating) && (
-				<FinishModal photosCount={albumData.length} />
-			)}
 			<button onClick={() => nextPhoto()}>Następny</button>
-			<form>
-				{new Array(Number(import.meta.env.VITE_MAX_RATING))
-					.fill(undefined)
-					.map((_, i) => (
-						<Fragment key={i}>
-							<label htmlFor={`${i + 1}`}>{i + 1}</label>
-							<input
-								type="radio"
-								name="rating"
-								id={`${i + 1}`}
-								value={i + 1}
-								checked={
-									albumData[currPhoto.index].rating === i + 1
-								}
-								onChange={() => ratePhoto(i + 1)}
-							/>
-						</Fragment>
-					))}
-				<button type="reset">reset</button>
-			</form>
-			<button>Enter</button>
-			<img src={currPhoto.photoBase64} alt="" />
+			<FinishModal photosCount={albumData.length} albumData={albumData} />
+			<SelectRating
+				albumData={albumData}
+				currPhoto={currPhoto}
+				setAlbumData={setAlbumData}
+			/>
+			<JudgementImage
+				setCurrPhoto={setCurrPhoto}
+				currPhoto={currPhoto}
+				albumData={albumData}
+			/>
 		</>
 	);
 }
