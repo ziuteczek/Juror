@@ -1,8 +1,7 @@
 const maxRatingRaw = import.meta.env.VITE_MAX_RATING;
 const devMode = import.meta.env.DEV;
-const offlineGalleryDirName = import.meta.env.OFFLINE_GALLERY_DIR_NAME as
-	| string
-	| undefined;
+const offlineGalleryDirName = import.meta.env
+	.VITE_OFFLINE_GALLERY_DIR_NAME as string;
 
 const maxRating = Number(maxRatingRaw);
 
@@ -12,7 +11,7 @@ if (!maxRatingRaw || Number.isNaN(maxRating)) {
 
 if (!offlineGalleryDirName || typeof offlineGalleryDirName !== "string") {
 	throw new Error(
-		"Env variable OFFLINE_GALLERY_DIR_NAME must be a non-empty string",
+		"Env variable VITE_OFFLINE_GALLERY_DIR_NAME must be a non-empty string",
 	);
 }
 

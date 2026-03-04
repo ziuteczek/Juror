@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import getOfflineGalleryData from "./utils/get.offline.gallery.data";
 import { Link } from "react-router-dom";
+import { devMode } from "../../env";
 
 type GalleryOflineData = Awaited<ReturnType<typeof getOfflineGalleryData>>;
 
@@ -10,7 +11,9 @@ export default function Gallery() {
 	useEffect(() => {
 		(async () => {
 			const galleriesData = await getOfflineGalleryData();
-			console.log(galleriesData);
+			if (devMode) {
+				console.log(galleriesData);
+			}
 			setGalleries(galleriesData);
 		})();
 	}, []);

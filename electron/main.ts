@@ -7,6 +7,7 @@ import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 import ElectronStore from "electron-store";
 import { albumData } from "../src/feature/judgement/types";
+import { offlineGalleryDirName } from "../src/env";
 
 const require = createRequire(import.meta.url);
 // electron-router-dom expects CommonJS-style `require` in the main process.
@@ -135,14 +136,10 @@ ipcMain.handle("photo-to-base-64", async (_, photoPath: string) => {
 
 // IPC handler for getting offline gallery data
 ipcMain.handle("get-offline-gallery-data", async () => {
-	const galleryFolderName = process.env.OFFLINE_GALLERY_DIR_NAME;
-
-	if (!galleryFolderName) {
-		throw new Error("Env variable OFFLINE_GALLERY_DIR_NAME not defined");
-	}
+	
 
 	const picturesPath = app.getPath("pictures");
-	const jurorFolderPath = path.join(picturesPath, galleryFolderName);
+	const jurorFolderPath = path.join(picturesPath, offlineGalleryDirName);
 
 	if (!(await dirExists(jurorFolderPath))) {
 		await mkdir(jurorFolderPath);

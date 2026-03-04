@@ -96,6 +96,10 @@ export default function Judgement() {
 		}
 	}, [albumData, currPhoto.index]);
 
+	if (devMode) {
+		console.log(albumData);
+	}
+	
 	if (!albumTitle) {
 		naviate("/");
 		return <></>;
@@ -103,10 +107,6 @@ export default function Judgement() {
 
 	if (!albumData[currPhoto.index]) {
 		return <div>Loading...</div>;
-	}
-
-	if (devMode) {
-		console.log(albumData);
 	}
 
 	return (
