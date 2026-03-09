@@ -2,7 +2,7 @@ export interface albumData {
 	title: string;
 	path: string;
 	rating: number | null;
-	lastTimeSkipped: Date | null;
+	lastTimeDisplayed: Date | null;
 }
 /**
  * Represents the current photo being viewed or edited.

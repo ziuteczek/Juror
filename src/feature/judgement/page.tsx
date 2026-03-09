@@ -8,6 +8,7 @@ import FinishModal from "./components/finish.modal";
 import JudgementImage from "./components/image";
 import { devMode } from "../../env";
 import SelectRating from "./components/select.rating";
+import ChangePhotos from "./components/change.photos";
 
 export type { albumData };
 
@@ -21,19 +22,6 @@ export default function Judgement() {
 		index: -1,
 		photoBase64: "",
 	});
-
-	const nextPhoto = () => {
-		if (albumData[currPhoto.index].rating) {
-			setAlbumData((prev) =>
-				prev.map((photo, index) =>
-					index === currPhoto.index
-						? { ...photo, lastTimeSkipped: new Date() }
-						: { ...photo },
-				),
-			);
-		}
-		setCurrPhoto({ index: -1, photoBase64: "" });
-	};
 
 	//Initial album load
 	useEffect(() => {
@@ -58,15 +46,15 @@ export default function Judgement() {
 		const earliestSkippedPhotoDateEpoch = Math.min(
 			...albumData
 				.filter((photo) => !photo.rating)
-				.map((photo) => photo.lastTimeSkipped?.getTime())
+				.map((photo) => photo.lastTimeDisplayed?.getTime())
 				.filter((time): time is number => time !== undefined),
 		);
 
 		const earliestSkippedPhotoIndex = albumData
-			.filter((photo) => photo.lastTimeSkipped)
+			.filter((photo) => photo.lastTimeDisplayed)
 			.findIndex(
 				(photo) =>
-					photo.lastTimeSkipped?.getTime() ===
+					photo.lastTimeDisplayed?.getTime() ===
 					earliestSkippedPhotoDateEpoch,
 			);
 
@@ -99,7 +87,7 @@ export default function Judgement() {
 	if (devMode) {
 		console.log(albumData);
 	}
-	
+
 	if (!albumTitle) {
 		naviate("/");
 		return <></>;
@@ -111,7 +99,12 @@ export default function Judgement() {
 
 	return (
 		<>
-			<button onClick={() => nextPhoto()}>Następny</button>
+			<ChangePhotos
+				albumData={albumData}
+				currPhoto={currPhoto}
+				setAlbumData={setAlbumData}
+				setCurrPhoto={setCurrPhoto}
+			/>
 			<FinishModal photosCount={albumData.length} albumData={albumData} />
 			<SelectRating
 				albumData={albumData}
