@@ -16,6 +16,38 @@ export default function ChangePhotos({
 	const [prevPhotoPossible, setPrevPhotoPossible] = useState(false);
 
 	const nextPhoto = () => {
+		if (
+			albumData.find(
+				(photo) =>
+					(photo.lastTimeDisplayed?.getTime() ?? 0) >
+					(albumData[currPhoto.index].lastTimeDisplayed?.getTime() ??
+						Infinity),
+			)
+		) {
+			const photosDisplayedBeforeCurrPhoto = albumData
+				.filter(
+					(photo) =>
+						(photo.lastTimeDisplayed?.getTime() ?? 0) >
+						(albumData[
+							currPhoto.index
+						].lastTimeDisplayed?.getTime() as number),
+				)
+				.map((photo) => photo.lastTimeDisplayed?.getTime() as number);
+			const nextPhotoLastTimeDisplayed = Math.min(
+				...photosDisplayedBeforeCurrPhoto,
+			);
+			if (!isFinite(nextPhotoLastTimeDisplayed)) {
+				return;
+			}
+			const nextPhotoIndex = albumData.findIndex(
+				(photo) =>
+					photo.lastTimeDisplayed?.getTime() ===
+					nextPhotoLastTimeDisplayed,
+			) as number;
+			setCurrPhoto({ index: nextPhotoIndex, photoBase64: "" });
+			return;
+		}
+
 		setAlbumData((prev) =>
 			prev.map((photo, index) =>
 				index === currPhoto.index
