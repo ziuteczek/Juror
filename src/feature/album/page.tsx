@@ -54,7 +54,7 @@ export default function Album() {
 				/>
 			</Link>
 
-			<div className="flex gap-5 p-3 pt-1">
+			<div className="flex gap-5 p-3 pt-1 flex-wrap">
 				<Link
 					to={`/judgement?album=${albumPath}`}
 					className="flex items-center justify-center w-50 h-50 bg-green-600 mt-6"

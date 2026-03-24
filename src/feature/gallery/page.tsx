@@ -20,7 +20,7 @@ export default function Gallery() {
 
 	return (
 		<>
-			<div className="flex p-3 gap-3">
+			<div className="flex p-3 gap-3 flex-wrap">
 				{galleries.map(({ name, thumbnail, path }) => (
 					<AlbumThumbnail
 						name={name}
