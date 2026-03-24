@@ -1,4 +1,5 @@
 import { ipcRenderer, contextBridge } from "electron";
+import { albumData } from "../src/feature/judgement/types";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -31,5 +32,11 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	},
 	photoToBase64(photoPath: string) {
 		return ipcRenderer.invoke("photo-to-base-64", photoPath);
+	},
+	saveAlbumData(albumPath: string, albumData: albumData[]) {
+		return ipcRenderer.invoke("save-album-data", albumPath, albumData);
+	},
+	resetAlbumData(albumPath: string) {
+		return ipcRenderer.invoke("reset-album-data", albumPath);
 	},
 });

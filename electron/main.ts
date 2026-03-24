@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -190,7 +190,19 @@ ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
 		const albumTitle = path.basename(albumPath);
 
 		if (storage.has(albumTitle)) {
-			return storage.get(albumTitle) as albumData[];
+			const albumDataRaw = storage.get(albumTitle) as {
+				title: string;
+				path: string;
+				rating: number | null;
+				lastTimeDisplayed: number | null;
+			}[];
+			return albumDataRaw.map((data) => ({
+				...data,
+				lastTimeDisplayed:
+					data.lastTimeDisplayed != null
+						? new Date(data.lastTimeDisplayed)
+						: null,
+			})) as albumData[];
 		}
 
 		const albumFiles = await readdir(albumPath, { withFileTypes: true });
@@ -211,5 +223,51 @@ ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
 		return [];
 	}
 });
+
+ipcMain.handle(
+	"save-album-data",
+	async (
+		_: IpcMainInvokeEvent,
+		albumPath: string,
+		albumData: albumData[],
+	) => {
+		try {
+			if (!(await dirExists(albumPath))) {
+				console.warn(
+					`Album path with given directory (${albumPath}) doesn't exists`,
+				);
+				return false;
+			}
+
+			const storage = new ElectronStore();
+			const albumTitle = path.basename(albumPath);
+			const albumDataComputed = albumData.map((data) => ({
+				...data,
+				lastTimeDisplayed: data.lastTimeDisplayed?.getTime() ?? null,
+			}));
+
+			storage.set(albumTitle, albumDataComputed);
+			return true;
+		} catch (err) {
+			console.error(err);
+			return false;
+		}
+	},
+);
+
+ipcMain.handle(
+	"reset-album-data",
+	(_: IpcMainInvokeEvent, albumPath: string) => {
+		try {
+			const storage = new ElectronStore();
+			const albumTitle = path.basename(albumPath);
+			storage.delete(albumTitle);
+			return true;
+		} catch (err) {
+			console.error(err);
+			return false;
+		}
+	},
+);
 
 app.whenReady().then(createWindow);

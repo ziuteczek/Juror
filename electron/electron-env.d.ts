@@ -30,5 +30,7 @@ interface Window {
 		getOfflineAlbumPhotosList(albumPath: string): Promise<string[]>;
 		getAlbumData(albumPath: string): Promise<albumData[]>;
 		photoToBase64(photoPath: string): Promise<string>;
+		saveAlbumData(albumPath: string, albumData: albumData[]): boolean;
+		resetAlbumData(albumPath: string): boolean;
 	};
 }
