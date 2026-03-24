@@ -98,24 +98,27 @@ export default function Judgement() {
 	}
 
 	return (
-		<>
-			<ChangePhotos
-				albumData={albumData}
-				currPhoto={currPhoto}
-				setAlbumData={setAlbumData}
-				setCurrPhoto={setCurrPhoto}
-			/>
-			<FinishModal photosCount={albumData.length} albumData={albumData} />
-			<SelectRating
-				albumData={albumData}
-				currPhoto={currPhoto}
-				setAlbumData={setAlbumData}
-			/>
+		<div className="flex max-h-svh h-svh">
 			<JudgementImage
 				setCurrPhoto={setCurrPhoto}
 				currPhoto={currPhoto}
 				albumData={albumData}
 			/>
-		</>
+
+			<div className="flex-1 flex flex-col p-2 justify-center items-center">
+				<SelectRating
+					albumData={albumData}
+					currPhoto={currPhoto}
+					setAlbumData={setAlbumData}
+				/>
+				<ChangePhotos
+					albumData={albumData}
+					currPhoto={currPhoto}
+					setAlbumData={setAlbumData}
+					setCurrPhoto={setCurrPhoto}
+				/>
+			</div>
+			<FinishModal photosCount={albumData.length} albumData={albumData} />
+		</div>
 	);
 }

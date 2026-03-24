@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { albumData, currPhotoData } from "../types";
 
 export default function ChangePhotos({
@@ -85,13 +85,13 @@ export default function ChangePhotos({
 	};
 
 	useEffect(() => {
-		const isPrevPhotoPossible = albumData.some(
-			(photo) =>
-				photo.lastTimeDisplayed &&
-				photo.lastTimeDisplayed.getTime() <
-					(albumData[currPhoto.index].lastTimeDisplayed?.getTime() ??
-						0),
-		);
+		// const isPrevPhotoPossible = albumData.some(
+		// 	(photo) =>
+		// 		photo.lastTimeDisplayed &&
+		// 		photo.lastTimeDisplayed.getTime() <
+		// 			(albumData[currPhoto.index].lastTimeDisplayed?.getTime() ??
+		// 				0),
+		// );
 		// const isNextPhotoPossible = albumData.some(
 		// 	(photo) =>
 		// 		photo.rating &&
@@ -100,17 +100,27 @@ export default function ChangePhotos({
 		// 			(albumData[currPhoto.index].lastTimeDisplayed?.getTime() ??
 		// 				0),
 		// );
-		setPrevPhotoPossible(isPrevPhotoPossible);
+		// setPrevPhotoPossible(isPrevPhotoPossible);
 		// setNextPhotoPossible(isNextPhotoPossible);
 	}, [albumData, currPhoto]);
 	return (
-		<>
-			<button onClick={prevPhoto} disabled={false}>
-				Last
-			</button>
-			<button onClick={nextPhoto} disabled={false}>
-				Next
-			</button>
-		</>
+		<div className="flex items-center justify-center">
+			<div className="flex gap-3 font-bold text-white">
+				<button
+					onClick={prevPhoto}
+					disabled={false}
+					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300"
+				>
+					Last
+				</button>
+				<button
+					onClick={nextPhoto}
+					disabled={false}
+					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300"
+				>
+					Next
+				</button>
+			</div>
+		</div>
 	);
 }

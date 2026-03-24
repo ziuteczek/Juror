@@ -136,8 +136,6 @@ ipcMain.handle("photo-to-base-64", async (_, photoPath: string) => {
 
 // IPC handler for getting offline gallery data
 ipcMain.handle("get-offline-gallery-data", async () => {
-	
-
 	const picturesPath = app.getPath("pictures");
 	const jurorFolderPath = path.join(picturesPath, offlineGalleryDirName);
 
@@ -154,7 +152,7 @@ ipcMain.handle("get-offline-gallery-data", async () => {
 			.filter((dir) => dir.isDirectory())
 			.map(async (dir) => ({
 				name: dir.name,
-				path: dir.parentPath,
+				path: path.join(dir.parentPath, dir.name),
 				thumbnail: await getThumbnail(
 					path.join(dir.parentPath, dir.name),
 				),

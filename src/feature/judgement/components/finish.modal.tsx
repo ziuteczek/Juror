@@ -19,7 +19,6 @@ export default function FinishModal({
 			<h1>Finish</h1>
 			<p>You finished rating all of your ${photosCount} photos</p>
 			<Link to={"/offline-gallery"}>Back to gallery</Link>
-
 			<button>Export resoults</button>
 		</dialog>
 	);

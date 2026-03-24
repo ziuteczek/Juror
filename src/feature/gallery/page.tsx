@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import getOfflineGalleryData from "./utils/get.offline.gallery.data";
-import { Link } from "react-router-dom";
 import { devMode } from "../../env";
+import AlbumThumbnail from "./components/album.thumbnail";
 
 type GalleryOflineData = Awaited<ReturnType<typeof getOfflineGalleryData>>;
 
@@ -19,16 +19,10 @@ export default function Gallery() {
 	}, []);
 
 	return (
-		<>
-			<Link to={"/judgement?album=/home/stasio/Pictures/juror/drupa"}>
-				dupa
-			</Link>
-			{galleries.map((gallery) => (
-				<div key={gallery.name}>
-					<p>{gallery.name}</p>
-					<img src={gallery.thumbnail} alt="" />
-				</div>
+		<div className="flex p-3 gap-3">
+			{galleries.map(({ name, thumbnail, path }) => (
+				<AlbumThumbnail name={name} thumbnail={thumbnail} path={path} />
 			))}
-		</>
+		</div>
 	);
 }

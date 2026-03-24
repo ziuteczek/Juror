@@ -22,5 +22,5 @@ export default function JudgementImage({
 		);
 	}, [albumData, currPhoto.index, setCurrPhoto]);
 
-	return <img src={currPhoto.photoBase64} alt={"Photo to judge"} />;
+	return <img src={currPhoto.photoBase64} alt={"Photo to judge"} className="object-contain max-h-svh max-w-[90svw]" />;
 }
