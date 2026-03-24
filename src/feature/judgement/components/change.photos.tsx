@@ -13,7 +13,7 @@ export default function ChangePhotos({
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
 	// const [nextPhotoPossible, setNextPhotoPossible] = useState(false);
-	const [prevPhotoPossible, setPrevPhotoPossible] = useState(false);
+	// const [prevPhotoPossible, setPrevPhotoPossible] = useState(false);
 
 	const nextPhoto = () => {
 		if (
