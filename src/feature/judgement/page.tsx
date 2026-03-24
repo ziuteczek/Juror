@@ -9,6 +9,7 @@ import JudgementImage from "./components/image";
 import { devMode } from "../../env";
 import SelectRating from "./components/select.rating";
 import ChangePhotos from "./components/change.photos";
+// import settingsIcon from "../../assets/settings.icon.svg";
 
 export type { albumData };
 
@@ -117,6 +118,7 @@ export default function Judgement() {
 					setAlbumData={setAlbumData}
 					setCurrPhoto={setCurrPhoto}
 				/>
+				{/* <img src={settingsIcon} alt="" /> */}
 			</div>
 			<FinishModal photosCount={albumData.length} albumData={albumData} />
 		</div>

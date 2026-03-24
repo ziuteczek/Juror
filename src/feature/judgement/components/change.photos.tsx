@@ -103,6 +103,22 @@ export default function ChangePhotos({
 		// setPrevPhotoPossible(isPrevPhotoPossible);
 		// setNextPhotoPossible(isNextPhotoPossible);
 	}, [albumData, currPhoto]);
+
+	useEffect(() => {
+		const handleKeyPress = (e: KeyboardEvent) => {
+			if (e.code !== "Enter") {
+				return;
+			}
+
+			nextPhoto();
+		};
+
+		document.addEventListener("keydown", handleKeyPress);
+
+		return () => {
+			document.removeEventListener("keydown", handleKeyPress);
+		};
+	});
 	return (
 		<div className="flex items-center justify-center">
 			<div className="flex gap-3 font-bold text-white">

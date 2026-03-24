@@ -9,7 +9,7 @@ export default function AlbumThumbnail({
 	thumbnail: string;
 	path: string;
 }) {
-	const albumPath = `/judgement?album=${path}`;
+	const albumPath = `/album?album=${path}`;
 
 	return (
 		<Link to={albumPath}>

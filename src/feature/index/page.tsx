@@ -4,7 +4,7 @@ export default function HomePage() {
 	return (
 		<div className="flex justify-center items-center h-svh flex-col">
 			<Link
-				to={"offline-gallery"}
+				to={"gallery"}
 				className="uppercase bg-green-700 hover:bg-green-900 text-white py-5 px-10 text-2xl"
 			>
 				Your gallery

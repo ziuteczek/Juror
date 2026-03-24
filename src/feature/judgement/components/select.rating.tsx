@@ -26,7 +26,7 @@ export default function SelectRating({
 	]);
 
 	useEffect(() => {
-		const ratedByKeyboard = (e: KeyboardEvent) => {
+		const handleKeyDown = (e: KeyboardEvent) => {
 			const keyCode = e.code;
 			const digitKeyword = "Digit";
 
@@ -46,10 +46,10 @@ export default function SelectRating({
 			}
 		};
 
-		document.addEventListener("keydown", ratedByKeyboard);
+		document.addEventListener("keydown", handleKeyDown);
 
 		return () => {
-			document.removeEventListener("keydown", ratedByKeyboard);
+			document.removeEventListener("keydown", handleKeyDown);
 		};
 	}, [ratePhotoCallback]);
 
@@ -65,7 +65,11 @@ export default function SelectRating({
 					<Fragment key={i}>
 						<label
 							htmlFor={`${i + 1}`}
-							className={`font-bold text-4xl ${isSelected && "text-sky-700"} cursor-pointer hover:${isSelected ? "text-sky-700" : "text-gray-600"} transition-colors duration-150`}
+							className={`font-bold text-4xl cursor-pointer transition-colors duration-150 ${
+								isSelected
+									? "text-sky-700 hover:text-sky-700"
+									: "hover:text-gray-600"
+							}`}
 						>
 							{i + 1}
 						</label>
