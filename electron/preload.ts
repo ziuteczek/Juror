@@ -39,4 +39,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	resetAlbumData(albumPath: string) {
 		return ipcRenderer.invoke("reset-album-data", albumPath);
 	},
+	exportAlbumData(albumData: albumData[]) {
+		return ipcRenderer.invoke("export-album-data", albumData);
+	},
 });

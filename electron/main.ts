@@ -1,13 +1,21 @@
 import "dotenv/config";
-import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron";
+import {
+	app,
+	BrowserWindow,
+	dialog,
+	ipcMain,
+	IpcMainInvokeEvent,
+} from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import path from "node:path";
+import path, { extname } from "node:path";
 import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 import ElectronStore from "electron-store";
 import { albumData } from "../src/feature/judgement/types";
 import { offlineGalleryDirName } from "../src/env";
+import { writeFile } from "node:fs/promises";
+import XLSX from "xlsx";
 
 const require = createRequire(import.meta.url);
 // electron-router-dom expects CommonJS-style `require` in the main process.
@@ -270,4 +278,64 @@ ipcMain.handle(
 	},
 );
 
+// ...existing code...
+
+ipcMain.handle(
+    "export-album-data",
+    async (_: IpcMainInvokeEvent, albumData: albumData[]) => {
+        try {
+            const { canceled, filePath } = await dialog.showSaveDialog({
+                title: "Save your file",
+                defaultPath: "output.xlsx",
+                filters: [
+                    { name: "JSON", extensions: ["json"] },
+                    { name: "Excel", extensions: ["xlsx"] },
+                ],
+            });
+
+            if (canceled || !filePath) {
+                return false;
+            }
+
+            let outputPath = filePath;
+            let extension = extname(outputPath).toLowerCase();
+
+            if (!extension) {
+                extension = ".xlsx";
+                outputPath = `${outputPath}${extension}`;
+            }
+
+            const exportData = albumData.map((item) => ({
+                ...item,
+                lastTimeDisplayed: item.lastTimeDisplayed
+                    ? item.lastTimeDisplayed.toISOString()
+                    : null,
+            }));
+
+            if (extension === ".json") {
+                await writeFile(
+                    outputPath,
+                    JSON.stringify(exportData, null, 2),
+                    "utf-8",
+                );
+                return true;
+            }
+
+            if (extension === ".xlsx") {
+                const worksheet = XLSX.utils.json_to_sheet(exportData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "ratings");
+                XLSX.writeFile(workbook, outputPath);
+                return true;
+            }
+
+            throw new Error(`Unsupported file extension: ${extension}`);
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
+    },
+);
+
+// ...existing code...
 app.whenReady().then(createWindow);

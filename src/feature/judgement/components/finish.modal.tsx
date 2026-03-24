@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { albumData } from "../types";
 import flowers from "../../../assets/flowers.svg";
+import exportAlbumData from "../untils/export";
 export default function FinishModal({ albumData }: { albumData: albumData[] }) {
 	const end = albumData.every((photo) => !!photo.rating);
 
@@ -23,8 +24,18 @@ export default function FinishModal({ albumData }: { albumData: albumData[] }) {
 				You finished rating all of your {albumData.length} photos
 			</p>
 			<div className="flex flex-col items-center gap-2">
-				<Link to={"/"} className="block bg-blue-500 w-full py-2 text-center text-white ">Back to the gallery</Link>
-				<button className="block bg-green-500 w-full py-2 text-center">Export resoults</button>
+				<Link
+					to={"/"}
+					className="block bg-blue-500 w-full py-2 text-center text-white "
+				>
+					Back to the gallery
+				</Link>
+				<button
+					className="block bg-green-500 w-full py-2 text-center cursor-pointer"
+					onClick={() => exportAlbumData(albumData)}
+				>
+					Export resoults
+				</button>
 			</div>
 		</dialog>
 	);

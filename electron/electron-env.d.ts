@@ -32,5 +32,6 @@ interface Window {
 		photoToBase64(photoPath: string): Promise<string>;
 		saveAlbumData(albumPath: string, albumData: albumData[]): boolean;
 		resetAlbumData(albumPath: string): boolean;
+		exportAlbumData(albumData: albumData[]): Promise<boolean>;
 	};
 }
