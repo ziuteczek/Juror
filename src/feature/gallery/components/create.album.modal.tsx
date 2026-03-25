@@ -29,19 +29,19 @@ export default function CreateAlbumModal({
 			return;
 		}
 
-		const success = await createteNewAlbum(albumTitle);
+		const newAlbumPath = await createteNewAlbum(albumTitle);
 
 		setAlbumTitle("");
 		setIsVisible(false);
 
-		if (!success) {
+		if (!newAlbumPath) {
 			alert("Failed to create album");
 			return;
 		}
 
 		alert("Album created successfully");
 
-		const successDirOpen = await openAlbumDirectory(albumTitle);
+		const successDirOpen = await openAlbumDirectory(newAlbumPath);
 		if (!successDirOpen) {
 			alert("Failed to open album directory");
 		}

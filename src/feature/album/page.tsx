@@ -4,10 +4,12 @@ import getAlbumData from "../judgement/utils/get.album.data";
 import { albumData } from "../judgement/types";
 import leftArrow from "../../assets/left.arrow.icon.svg";
 import PhotoThumbnail from "./components/photo.thumbnail";
-import resetIcon from "../../assets/reset.icon.svg";
 import resetAlbumData from "./utils/reset";
-import trashIcon from "../../assets/trash.icon.svg";
 import deleteAlbum from "./utils/delete";
+import trashIcon from "../../assets/trash.icon.svg";
+import resetIcon from "../../assets/reset.icon.svg";
+import directoryIcon from "../../assets/directory.icon.svg";
+import openAlbumDirectory from "../gallery/utils/open.album.directory";
 
 export default function Album() {
 	const [searchParams] = useSearchParams();
@@ -78,6 +80,14 @@ export default function Album() {
 					<span className="text-4xl uppercase text-white">start</span>
 				</Link>
 
+				{/* open directory */}
+				<button
+					onClick={() => openAlbumDirectory(albumPath)}
+					className="flex items-center justify-center w-50 h-50 bg-yellow-600 mt-6 flex-col cursor-pointer"
+				>
+					<img src={directoryIcon} alt="open directory icon" />
+				</button>
+
 				{/* reset data button */}
 				<button
 					onClick={handleResetBtn}
@@ -91,6 +101,7 @@ export default function Album() {
 					reset
 				</button>
 
+				{/* Delete data  */}
 				<button
 					onClick={handleDeleteBtn}
 					className="flex justify-center items-center h-50 w-50 size-full bg-red-500 mt-6 cursor-pointer"

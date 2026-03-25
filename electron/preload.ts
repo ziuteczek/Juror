@@ -45,10 +45,10 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	createAlbum(albumName: string) {
 		return ipcRenderer.invoke("create-album", albumName);
 	},
-	openAlbumDirectory(albumPath: string) {
-		return ipcRenderer.invoke("open-album-directory", albumPath);
+	openAlbumDirectory(albumName: string) {
+		return ipcRenderer.invoke("open-album-directory", albumName);
 	},
-	deleteAlbum(albumPath: string) {
+	async deleteAlbum(albumPath: string): Promise<string> {
 		return ipcRenderer.invoke("delete-album", albumPath);
-	}
+	},
 });

@@ -350,21 +350,18 @@ ipcMain.handle(
 			}
 
 			await mkdir(newAlbumPath, { recursive: true });
-			return true;
+			return newAlbumPath;
 		} catch (err) {
 			console.error(err);
-			return false;
+			return "";
 		}
 	},
 );
 
 ipcMain.handle(
 	"open-album-directory",
-	async (_: IpcMainInvokeEvent, albumName: string) => {
+	async (_: IpcMainInvokeEvent, albumPath: string) => {
 		try {
-			const picturesPath = app.getPath("pictures");
-			const jurorFolderPath = path.join(picturesPath, offlineGalleryDirName);
-			const albumPath = path.join(jurorFolderPath, albumName);
 			await shell.openPath(albumPath);
 			return true;
 		} catch (err) {
