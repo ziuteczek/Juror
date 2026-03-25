@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import type { albumData, currPhotoData } from "./types";
-import getAlbumData from "./untils/get.album.data";
+import getAlbumData from "./utils/get.album.data";
 
 import FinishModal from "./components/finish.modal";
 import JudgementImage from "./components/image";

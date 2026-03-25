@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import photoToBase64 from "../../judgement/untils/photo.to.base64";
+import photoToBase64 from "../../judgement/utils/photo.to.base64";
 import { Link } from "react-router-dom";
 import { maxRating } from "../../../env";
 

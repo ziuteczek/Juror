@@ -42,4 +42,10 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	exportAlbumData(albumData: albumData[]) {
 		return ipcRenderer.invoke("export-album-data", albumData);
 	},
+	createAlbum(albumName: string) {
+		return ipcRenderer.invoke("create-album", albumName);
+	},
+	openAlbumDirectory(albumPath: string) {
+		return ipcRenderer.invoke("open-album-directory", albumPath);
+	},
 });

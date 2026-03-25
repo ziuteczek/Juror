@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import exitIcon from "../../../assets/exit.icon.svg";
-import saveAlbumData from "../untils/save.album.data";
+import saveAlbumData from "../utils/save.album.data";
 import { albumData } from "../types";
 
 export default function ExitJudgement({

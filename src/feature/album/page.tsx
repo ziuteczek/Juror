@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import getAlbumData from "../judgement/untils/get.album.data";
+import getAlbumData from "../judgement/utils/get.album.data";
 import { albumData } from "../judgement/types";
 import leftArrow from "../../assets/left.arrow.icon.svg";
 import PhotoThumbnail from "./components/photo.thumbnail";

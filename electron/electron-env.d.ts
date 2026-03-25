@@ -33,5 +33,7 @@ interface Window {
 		saveAlbumData(albumPath: string, albumData: albumData[]): boolean;
 		resetAlbumData(albumPath: string): boolean;
 		exportAlbumData(albumData: albumData[]): Promise<boolean>;
+		createAlbum(albumName: string): Promise<boolean>;
+		openAlbumDirectory(albumPath: string): Promise<boolean>;
 	};
 }

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import type { albumData, currPhotoData } from "../types";
-import photoToBase64 from "../untils/photo.to.base64";
+import photoToBase64 from "../utils/photo.to.base64";
 
 export default function JudgementImage({
 	currPhoto,
