@@ -35,5 +35,6 @@ interface Window {
 		exportAlbumData(albumData: albumData[]): Promise<boolean>;
 		createAlbum(albumName: string): Promise<boolean>;
 		openAlbumDirectory(albumPath: string): Promise<boolean>;
+		deleteAlbum(albumPath: string): Promise<boolean>;
 	};
 }

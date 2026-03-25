@@ -48,4 +48,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	openAlbumDirectory(albumPath: string) {
 		return ipcRenderer.invoke("open-album-directory", albumPath);
 	},
+	deleteAlbum(albumPath: string) {
+		return ipcRenderer.invoke("delete-album", albumPath);
+	}
 });

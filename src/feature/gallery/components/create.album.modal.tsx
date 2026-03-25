@@ -23,6 +23,12 @@ export default function CreateAlbumModal({
 
 	const createAlbum = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
+		if (!albumTitle) {
+			alert("Album title can't be empty");
+			return;
+		}
+
 		const success = await createteNewAlbum(albumTitle);
 
 		setAlbumTitle("");
@@ -39,6 +45,7 @@ export default function CreateAlbumModal({
 		if (!successDirOpen) {
 			alert("Failed to open album directory");
 		}
+		window.location.reload();
 	};
 
 	return (
@@ -49,7 +56,7 @@ export default function CreateAlbumModal({
 			{/* exit btn */}
 			<button
 				onClick={() => setIsVisible(false)}
-				className="max-w-20 max-h-20 size-full cursor-pointer absolut top-0 left-0"
+				className="max-w-20 max-h-20 size-full cursor-pointer absolute top-0 left-0"
 			>
 				<img src={xIcon} alt="exit icon" />
 			</button>

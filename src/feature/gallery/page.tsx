@@ -28,7 +28,7 @@ export default function Gallery() {
 					onClick={() => setCreateAlbumVisible(true)}
 					className="max-h-50 max-w-50 font-bold text-xl cursor-pointer text-left"
 				>
-					Nowy album
+					New album
 					<img
 						src={plusIcon}
 						alt="plus svg"

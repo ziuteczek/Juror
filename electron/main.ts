@@ -254,14 +254,23 @@ ipcMain.handle(
 	},
 );
 
+const deleteAlbumData = async (albumPath: string) => {
+	try {
+		const storage = new ElectronStore();
+		const albumTitle = path.basename(albumPath);
+		storage.delete(albumTitle);
+		return true;
+	} catch (err) {
+		console.error(err);
+		return false;
+	}
+};
+
 ipcMain.handle(
 	"reset-album-data",
 	(_: IpcMainInvokeEvent, albumPath: string) => {
 		try {
-			const storage = new ElectronStore();
-			const albumTitle = path.basename(albumPath);
-			storage.delete(albumTitle);
-			return true;
+			return deleteAlbumData(albumPath);
 		} catch (err) {
 			console.error(err);
 			return false;
@@ -357,6 +366,20 @@ ipcMain.handle(
 			const jurorFolderPath = path.join(picturesPath, offlineGalleryDirName);
 			const albumPath = path.join(jurorFolderPath, albumName);
 			await shell.openPath(albumPath);
+			return true;
+		} catch (err) {
+			console.error(err);
+			return false;
+		}
+	},
+);
+
+ipcMain.handle(
+	"delete-album",
+	async (_: IpcMainInvokeEvent, albumPath: string) => {
+		try {
+			deleteAlbumData(albumPath);
+			await shell.trashItem(albumPath);
 			return true;
 		} catch (err) {
 			console.error(err);
