@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import getAlbumData from "../judgement/utils/get.album.data";
-import { albumData } from "../judgement/types";
+import { photoData } from "../judgement/types";
 import leftArrow from "../../assets/left.arrow.icon.svg";
 import PhotoThumbnail from "./components/photo.thumbnail";
 import resetAlbumData from "./utils/reset";
@@ -11,12 +11,17 @@ import resetIcon from "../../assets/reset.icon.svg";
 import directoryIcon from "../../assets/directory.icon.svg";
 import openAlbumDirectory from "../gallery/utils/open.album.directory";
 
+/**
+ * Displays photos from an album specified in the URL search params ("album" query key).
+ * 
+ * Provides functionality to start judging, manage photos, and reset/delete album photos.
+ */
 export default function Album() {
 	const [searchParams] = useSearchParams();
 	const albumPath = searchParams.get("album");
 	const navigate = useNavigate();
 
-	const [albumData, setAlbumData] = useState<albumData[]>([]);
+	const [albumData, setAlbumData] = useState<photoData[]>([]);
 
 	//Initial album load
 	useEffect(() => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import type { albumData, currPhotoData } from "./types";
+import type { photoData, currPhotoData } from "./types";
 import getAlbumData from "./utils/get.album.data";
 
 import FinishModal from "./components/finish.modal";
@@ -10,12 +10,12 @@ import { devMode } from "../../env";
 import SelectRating from "./components/select.rating";
 import ChangePhotos from "./components/change.photos";
 import ExitJudgement from "./components/exit";
-// import settingsIcon from "../../assets/settings.icon.svg";
 
-export type { albumData };
-
+/**
+ * It's judging album given in search params under the key "album".
+ */
 export default function Judgement() {
-	const [albumData, setAlbumData] = useState<albumData[]>([]);
+	const [albumData, setAlbumData] = useState<photoData[]>([]);
 	const [searchParams] = useSearchParams();
 	const albumTitle = searchParams.get("album");
 	const naviate = useNavigate();

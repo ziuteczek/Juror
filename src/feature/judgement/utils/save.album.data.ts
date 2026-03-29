@@ -1,8 +1,8 @@
-import { albumData } from "../types";
+import { photoData } from "../types";
 
 export default async function saveAlbumData(
 	albumPath: string,
-	albumData: albumData[],
+	albumData: photoData[],
 ) {
 	return window.ipcRenderer.saveAlbumData(albumPath, albumData);
 }

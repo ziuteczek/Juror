@@ -11,7 +11,6 @@ export default function App() {
 		<Router
 			main={
 				<>
-					{/* <Route path="/" element={<HomePage />} index /> */}
 					<Route path="/" element={<Gallery />}  index/>
 					<Route path="/judgement" element={<Judgement />} />
 					<Route path="/album" element={<Album />} />

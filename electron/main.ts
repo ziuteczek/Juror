@@ -13,7 +13,7 @@ import path, { extname } from "node:path";
 import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 import ElectronStore from "electron-store";
-import { albumData } from "../src/feature/judgement/types";
+import { photoData } from "../src/feature/judgement/types";
 import { offlineGalleryDirName } from "../src/env";
 import { writeFile } from "node:fs/promises";
 import * as XLSX from "xlsx";
@@ -64,7 +64,10 @@ function createWindow() {
 
 	// Test active push message to Renderer-process.
 	win.webContents.on("did-finish-load", () => {
-		win?.webContents.send("main-process-message", new Date().toLocaleString());
+		win?.webContents.send(
+			"main-process-message",
+			new Date().toLocaleString(),
+		);
 	});
 
 	if (VITE_DEV_SERVER_URL) {
@@ -111,7 +114,6 @@ async function getThumbnail(dirPath: string): Promise<string> {
 		].sort();
 
 		if (photos.length === 0) {
-			console.warn(`There are no photos in ${dirPath} gallery`);
 			return "";
 		}
 
@@ -159,7 +161,9 @@ ipcMain.handle("get-offline-gallery-data", async () => {
 			.map(async (dir) => ({
 				name: dir.name,
 				path: path.join(dir.parentPath, dir.name),
-				thumbnail: await getThumbnail(path.join(dir.parentPath, dir.name)),
+				thumbnail: await getThumbnail(
+					path.join(dir.parentPath, dir.name),
+				),
 			})),
 	);
 });
@@ -206,13 +210,14 @@ ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
 					data.lastTimeDisplayed != null
 						? new Date(data.lastTimeDisplayed)
 						: null,
-			})) as albumData[];
+			})) as photoData[];
 		}
 
 		const albumFiles = await readdir(albumPath, { withFileTypes: true });
 		const albumPhotos = albumFiles.filter(
 			(file) =>
-				(file.isFile() && file.name.toLocaleLowerCase().endsWith(".jpeg")) ||
+				(file.isFile() &&
+					file.name.toLocaleLowerCase().endsWith(".jpeg")) ||
 				file.name.toLocaleLowerCase().endsWith(".jpg"),
 		);
 		const albumData = albumPhotos.map((photo) => ({
@@ -229,7 +234,11 @@ ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
 
 ipcMain.handle(
 	"save-album-data",
-	async (_: IpcMainInvokeEvent, albumPath: string, albumData: albumData[]) => {
+	async (
+		_: IpcMainInvokeEvent,
+		albumPath: string,
+		albumData: photoData[],
+	) => {
 		try {
 			if (!(await dirExists(albumPath))) {
 				console.warn(
@@ -282,7 +291,7 @@ ipcMain.handle(
 
 ipcMain.handle(
 	"export-album-data",
-	async (_: IpcMainInvokeEvent, albumData: albumData[]) => {
+	async (_: IpcMainInvokeEvent, albumData: photoData[]) => {
 		try {
 			const { canceled, filePath } = await dialog.showSaveDialog({
 				title: "Save your file",
@@ -342,7 +351,10 @@ ipcMain.handle(
 	async (_: IpcMainInvokeEvent, albumName: string) => {
 		try {
 			const picturesPath = app.getPath("pictures");
-			const jurorFolderPath = path.join(picturesPath, offlineGalleryDirName);
+			const jurorFolderPath = path.join(
+				picturesPath,
+				offlineGalleryDirName,
+			);
 			const newAlbumPath = path.join(jurorFolderPath, albumName);
 			if (await dirExists(newAlbumPath)) {
 				console.warn("Album with given name already exists");

@@ -1,6 +1,6 @@
 import { Fragment } from "react/jsx-runtime";
 import { maxRating } from "../../../env";
-import { albumData, currPhotoData } from "../types";
+import { photoData, currPhotoData } from "../types";
 import { Dispatch, SetStateAction, useCallback, useEffect } from "react";
 
 export default function SelectRating({
@@ -8,9 +8,9 @@ export default function SelectRating({
 	currPhoto,
 	setAlbumData,
 }: {
-	albumData: albumData[];
+	albumData: photoData[];
 	currPhoto: currPhotoData;
-	setAlbumData: Dispatch<SetStateAction<albumData[]>>;
+	setAlbumData: Dispatch<SetStateAction<photoData[]>>;
 }) {
 	const ratePhoto = (rating: number | null) =>
 		setAlbumData((prev) =>

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-import type { albumData, currPhotoData } from "../types";
+import type { photoData, currPhotoData } from "../types";
 import photoToBase64 from "../utils/photo.to.base64";
 
 export default function JudgementImage({
@@ -8,7 +8,7 @@ export default function JudgementImage({
 	setCurrPhoto,
 }: {
 	currPhoto: currPhotoData;
-	albumData: albumData[];
+	albumData: photoData[];
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
 	// When new photo is picked for rating

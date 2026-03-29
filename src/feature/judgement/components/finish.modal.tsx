@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { albumData } from "../types";
+import { photoData } from "../types";
 import flowers from "../../../assets/flowers.svg";
 import exportAlbumData from "../utils/export";
-export default function FinishModal({ albumData }: { albumData: albumData[] }) {
+export default function FinishModal({ albumData }: { albumData: photoData[] }) {
 	const end = albumData.every((photo) => !!photo.rating);
 
 	if (!end) {

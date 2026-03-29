@@ -1,14 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import exitIcon from "../../../assets/exit.icon.svg";
 import saveAlbumData from "../utils/save.album.data";
-import { albumData } from "../types";
+import { photoData } from "../types";
 
 export default function ExitJudgement({
 	albumPath,
 	albumData,
 }: {
 	albumPath: string;
-	albumData: albumData[];
+	albumData: photoData[];
 }) {
 	const navigate = useNavigate();
 

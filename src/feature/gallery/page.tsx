@@ -7,6 +7,9 @@ import CreateAlbumModal from "./components/create.album.modal";
 
 type GalleryOflineData = Awaited<ReturnType<typeof getOfflineGalleryData>>;
 
+/**
+ * Displays albums and allows creating new ones.
+ */
 export default function Gallery() {
 	const [galleries, setGalleries] = useState<GalleryOflineData>([]);
 	const [createAlbumVisible, setCreateAlbumVisible] = useState(false);
