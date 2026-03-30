@@ -24,6 +24,7 @@ import {
 import { writeFile } from "node:fs/promises";
 import * as XLSX from "xlsx";
 import Database from "better-sqlite3";
+import initDbSql from "./sql/init.sql";
 
 const require = createRequire(import.meta.url);
 // electron-router-dom expects CommonJS-style `require` in the main process.
@@ -117,6 +118,7 @@ async function fileExists(filePath: string) {
 async function initDb() {
 	try {
 		db = new Database(dbFileName);
+		db.exec(initDb);
 	} catch (err) {
 		console.error();
 	}

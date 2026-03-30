@@ -1,0 +1,12 @@
+PRAGMA foreign_keys = ON;
+CREATE TABLE IF NOT EXISTS album (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS photo (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_name TEXT UNIQUE,
+    rating integer,
+    last_displayed INTEGER
+)
