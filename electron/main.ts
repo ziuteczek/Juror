@@ -1,4 +1,5 @@
 import "dotenv/config";
+
 import {
 	app,
 	BrowserWindow,
@@ -14,9 +15,15 @@ import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 import ElectronStore from "electron-store";
 import { photoData } from "../src/pages/judgement/types";
-import { offlineGalleryDirName } from "../src/env";
+import {
+	baseDirName,
+	dbFileName,
+	photosDirName,
+	ratingsDirName,
+} from "../src/env";
 import { writeFile } from "node:fs/promises";
 import * as XLSX from "xlsx";
+import Database from "better-sqlite3";
 
 const require = createRequire(import.meta.url);
 // electron-router-dom expects CommonJS-style `require` in the main process.
@@ -44,6 +51,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
 	: RENDERER_DIST;
 
 let win: BrowserWindow | null;
+let db: InstanceType<typeof Database> | null;
 
 function createWindow() {
 	win = new BrowserWindow({
@@ -64,10 +72,7 @@ function createWindow() {
 
 	// Test active push message to Renderer-process.
 	win.webContents.on("did-finish-load", () => {
-		win?.webContents.send(
-			"main-process-message",
-			new Date().toLocaleString(),
-		);
+		win?.webContents.send("main-process-message", new Date().toLocaleString());
 	});
 
 	if (VITE_DEV_SERVER_URL) {
@@ -101,6 +106,21 @@ async function dirExists(dirPath: string): Promise<boolean> {
 		return false;
 	}
 }
+async function fileExists(filePath: string) {
+	try {
+		await readFile(filePath);
+		return true;
+	} catch {
+		return false;
+	}
+}
+async function initDb() {
+	try {
+		db = new Database(dbFileName);
+	} catch (err) {
+		console.error();
+	}
+}
 
 async function getThumbnail(dirPath: string): Promise<string> {
 	try {
@@ -109,7 +129,7 @@ async function getThumbnail(dirPath: string): Promise<string> {
 			...files.filter(
 				(file) =>
 					file.toLocaleLowerCase().endsWith(".jpg") ||
-					file.toLocaleLowerCase().endsWith(".jpeg"),
+					file.toLocaleLowerCase().endsWith(".jpeg")
 			),
 		].sort();
 
@@ -145,7 +165,7 @@ ipcMain.handle("photo-to-base-64", async (_, photoPath: string) => {
 // IPC handler for getting offline gallery data
 ipcMain.handle("get-offline-gallery-data", async () => {
 	const picturesPath = app.getPath("pictures");
-	const jurorFolderPath = path.join(picturesPath, offlineGalleryDirName);
+	const jurorFolderPath = path.join(picturesPath, baseDirName);
 
 	if (!(await dirExists(jurorFolderPath))) {
 		await mkdir(jurorFolderPath);
@@ -161,10 +181,8 @@ ipcMain.handle("get-offline-gallery-data", async () => {
 			.map(async (dir) => ({
 				name: dir.name,
 				path: path.join(dir.parentPath, dir.name),
-				thumbnail: await getThumbnail(
-					path.join(dir.parentPath, dir.name),
-				),
-			})),
+				thumbnail: await getThumbnail(path.join(dir.parentPath, dir.name)),
+			}))
 	);
 });
 
@@ -182,14 +200,14 @@ ipcMain.handle(
 			console.error(err);
 			return [];
 		}
-	},
+	}
 );
 //eslint-disable-next-line
 ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
 	try {
 		if (!(await dirExists(albumPath))) {
 			console.warn(
-				`Album path with given directory (${albumPath}) doesn't exists`,
+				`Album path with given directory (${albumPath}) doesn't exists`
 			);
 			return [];
 		}
@@ -216,9 +234,8 @@ ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
 		const albumFiles = await readdir(albumPath, { withFileTypes: true });
 		const albumPhotos = albumFiles.filter(
 			(file) =>
-				(file.isFile() &&
-					file.name.toLocaleLowerCase().endsWith(".jpeg")) ||
-				file.name.toLocaleLowerCase().endsWith(".jpg"),
+				(file.isFile() && file.name.toLocaleLowerCase().endsWith(".jpeg")) ||
+				file.name.toLocaleLowerCase().endsWith(".jpg")
 		);
 		const albumData = albumPhotos.map((photo) => ({
 			title: photo.name,
@@ -234,15 +251,11 @@ ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
 
 ipcMain.handle(
 	"save-album-data",
-	async (
-		_: IpcMainInvokeEvent,
-		albumPath: string,
-		albumData: photoData[],
-	) => {
+	async (_: IpcMainInvokeEvent, albumPath: string, albumData: photoData[]) => {
 		try {
 			if (!(await dirExists(albumPath))) {
 				console.warn(
-					`Album path with given directory (${albumPath}) doesn't exists`,
+					`Album path with given directory (${albumPath}) doesn't exists`
 				);
 				return false;
 			}
@@ -260,7 +273,7 @@ ipcMain.handle(
 			console.error(err);
 			return false;
 		}
-	},
+	}
 );
 
 const deleteAlbumData = async (albumPath: string) => {
@@ -284,7 +297,7 @@ ipcMain.handle(
 			console.error(err);
 			return false;
 		}
-	},
+	}
 );
 
 // ...existing code...
@@ -325,7 +338,7 @@ ipcMain.handle(
 				await writeFile(
 					outputPath,
 					JSON.stringify(exportData, null, 2),
-					"utf-8",
+					"utf-8"
 				);
 				return true;
 			}
@@ -343,7 +356,7 @@ ipcMain.handle(
 			console.error(err);
 			return false;
 		}
-	},
+	}
 );
 
 ipcMain.handle(
@@ -351,23 +364,32 @@ ipcMain.handle(
 	async (_: IpcMainInvokeEvent, albumName: string) => {
 		try {
 			const picturesPath = app.getPath("pictures");
-			const jurorFolderPath = path.join(
-				picturesPath,
-				offlineGalleryDirName,
-			);
-			const newAlbumPath = path.join(jurorFolderPath, albumName);
-			if (await dirExists(newAlbumPath)) {
-				console.warn("Album with given name already exists");
+			const jurorFolderPath = path.join(picturesPath, baseDirName);
+
+			const photosDirPath = path.join(jurorFolderPath, photosDirName);
+			const ratignDirPath = path.join(jurorFolderPath, ratingsDirName);
+
+			const photosPathAlbum = path.join(photosDirPath, albumName);
+			const ratingFilePath = path.join(ratignDirPath, dbFileName);
+
+			if (await dirExists(photosPathAlbum)) {
 				return false;
 			}
 
-			await mkdir(newAlbumPath, { recursive: true });
-			return newAlbumPath;
+			await mkdir(photosPathAlbum, { recursive: true });
+
+			try {
+				const x = new Database();
+			} catch (err) {
+				console.error(err);
+			}
+
+			return;
 		} catch (err) {
 			console.error(err);
 			return "";
 		}
-	},
+	}
 );
 
 ipcMain.handle(
@@ -380,7 +402,7 @@ ipcMain.handle(
 			console.error(err);
 			return false;
 		}
-	},
+	}
 );
 
 ipcMain.handle(
@@ -394,7 +416,7 @@ ipcMain.handle(
 			console.error(err);
 			return false;
 		}
-	},
+	}
 );
 
 app.whenReady().then(createWindow);
