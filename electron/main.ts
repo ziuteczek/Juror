@@ -13,7 +13,7 @@ import path, { extname } from "node:path";
 import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 import ElectronStore from "electron-store";
-import { photoData } from "../src/feature/judgement/types";
+import { photoData } from "../src/pages/judgement/types";
 import { offlineGalleryDirName } from "../src/env";
 import { writeFile } from "node:fs/promises";
 import * as XLSX from "xlsx";

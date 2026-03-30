@@ -1,5 +1,5 @@
 import { ipcRenderer, contextBridge } from "electron";
-import { photoData } from "../src/feature/judgement/types";
+import { photoData } from "../src/pages/judgement/types";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
