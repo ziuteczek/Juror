@@ -1,0 +1,1 @@
+INSERT INTO albums (name) VALUES ($album_name);

@@ -15,16 +15,10 @@ import { readdir, mkdir, readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 import ElectronStore from "electron-store";
 import { photoData } from "../src/pages/judgement/types";
-import {
-	baseDirName,
-	dbFileName,
-	photosDirName,
-	ratingsDirName,
-} from "../src/env";
+import { baseDirName, photosDirName } from "../src/env";
 import { writeFile } from "node:fs/promises";
 import * as XLSX from "xlsx";
-import Database from "better-sqlite3";
-import initDbSql from "./sql/init.sql";
+import { queries } from "./db";
 
 const require = createRequire(import.meta.url);
 // electron-router-dom expects CommonJS-style `require` in the main process.
@@ -52,7 +46,6 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
 	: RENDERER_DIST;
 
 let win: BrowserWindow | null;
-let db: InstanceType<typeof Database> | null;
 
 function createWindow() {
 	win = new BrowserWindow({
@@ -107,22 +100,15 @@ async function dirExists(dirPath: string): Promise<boolean> {
 		return false;
 	}
 }
-async function fileExists(filePath: string) {
-	try {
-		await readFile(filePath);
-		return true;
-	} catch {
-		return false;
-	}
-}
-async function initDb() {
-	try {
-		db = new Database(dbFileName);
-		db.exec(initDb);
-	} catch (err) {
-		console.error();
-	}
-}
+
+// async function fileExists(filePath: string) {
+// 	try {
+// 		await readFile(filePath);
+// 		return true;
+// 	} catch {
+// 		return false;
+// 	}
+// }
 
 async function getThumbnail(dirPath: string): Promise<string> {
 	try {
@@ -130,8 +116,9 @@ async function getThumbnail(dirPath: string): Promise<string> {
 		const photos = [
 			...files.filter(
 				(file) =>
-					file.toLocaleLowerCase().endsWith(".jpg") ||
-					file.toLocaleLowerCase().endsWith(".jpeg")
+					file.toLocaleLowerCase().endsWith("jpg") ||
+					file.toLocaleLowerCase().endsWith(".jpeg") ||
+					file.toLocaleLowerCase().endsWith(".png")
 			),
 		].sort();
 
@@ -368,28 +355,19 @@ ipcMain.handle(
 			const picturesPath = app.getPath("pictures");
 			const jurorFolderPath = path.join(picturesPath, baseDirName);
 
-			const photosDirPath = path.join(jurorFolderPath, photosDirName);
-			const ratignDirPath = path.join(jurorFolderPath, ratingsDirName);
+			const photosPathAll = path.join(jurorFolderPath, photosDirName);
+			const photosPathNewAlbum = path.join(photosPathAll, albumName);
 
-			const photosPathAlbum = path.join(photosDirPath, albumName);
-			const ratingFilePath = path.join(ratignDirPath, dbFileName);
-
-			if (await dirExists(photosPathAlbum)) {
-				return false;
+			if (!(await dirExists(photosPathNewAlbum))) {
+				await mkdir(photosPathNewAlbum, { recursive: true });
 			}
 
-			await mkdir(photosPathAlbum, { recursive: true });
+			queries.createAlbum.run({ album_name: albumName });
 
-			try {
-				const x = new Database();
-			} catch (err) {
-				console.error(err);
-			}
-
-			return;
+			return true;
 		} catch (err) {
 			console.error(err);
-			return "";
+			return false;
 		}
 	}
 );
