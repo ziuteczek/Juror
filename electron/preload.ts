@@ -35,4 +35,10 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	getAlbumsData() {
 		return ipcRenderer.invoke("get-albums-data-list");
 	},
+	getAlbumThumbnailBase64(albumId: string) {
+		return ipcRenderer.invoke("get-album-base-64-thumbnail", albumId);
+	},
+	getAlbum(albumId: string) {
+		return ipcRenderer.invoke("get-album", albumId);
+	},
 });

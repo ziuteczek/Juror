@@ -1,1 +1,1 @@
-SELECT * FROM albums;
+SELECT id, name, max_rating as 'maxRating', created_at as 'createdAt' FROM albums;

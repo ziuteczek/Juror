@@ -1,16 +1,15 @@
 SELECT
-  a.id AS album_id,
-  a.name AS album_name,
-  a.max_rating,
-  a.created_at,
+  a.id AS albumId,
+  a.name AS albumName,
+  a.max_rating AS maxRating,
+  a.created_at AS createdAt,
   COALESCE(
     (
       SELECT json_group_array(
         json_object(
-          'id', p.id,
-          'file_path', p.file_path,
+          'filePath', p.file_path,
           'rating', p.rating,
-          'last_displayed', p.last_displayed
+          'lastDisplay', p.last_displayed
         )
       )
       FROM photos p

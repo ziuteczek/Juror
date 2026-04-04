@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-import { photoData, currPhotoData } from "../types";
+import { currPhotoData } from "../types";
 
 export default function ChangePhotos({
 	currPhoto,
@@ -8,8 +8,8 @@ export default function ChangePhotos({
 	setCurrPhoto,
 }: {
 	currPhoto: currPhotoData;
-	albumData: photoData[];
-	setAlbumData: Dispatch<SetStateAction<photoData[]>>;
+	albumData: photo[];
+	setAlbumData: Dispatch<SetStateAction<photo[]>>;
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
 	// const [nextPhotoPossible, setNextPhotoPossible] = useState(false);

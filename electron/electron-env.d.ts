@@ -1,5 +1,33 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
+//prettier-ignore
+type returnWrapper<T> ={
+	success: true,
+	data: T,
+	error:null
+} | { 
+	success: false,
+	data: null,
+	error: unknown,
+};
+
+interface photo {
+	path: string;
+	rating: number | null;
+	lastTimeDisplayed: Date | null;
+}
+
+interface albumData {
+	id: string;
+	name: string;
+	maxRating: number;
+	createdAt: Date;
+}
+
+interface album extends albumData {
+	photos: photo[];
+}
+
 declare namespace NodeJS {
 	interface ProcessEnv {
 		/**
@@ -28,7 +56,7 @@ interface Window {
 		 * Queries albums list from database
 		 * @returns album data array (without photos)
 		 */
-		getAlbumsData(): albumData[];
+		getAlbumsData(): Promise<albumData[]>;
 
 		/**
 		 * Convers given photo to base64 string
@@ -41,10 +69,21 @@ interface Window {
 		 * @param albumName Name of an album.
 		 * @param maxRating Maximum rating that photo can achive in given album.
 		 */
-		createAlbum(albumName: string, maxRating: number): string;
+		createAlbum(albumName: string, maxRating: number): Promise<string>;
 		/**
 		 * Deletes given album from database (it won't delete photos files)
 		 */
 		deleteAlbum(albumId: string): boolean;
+
+		/**
+		 * Queries first photo from album, reads it and converts to base64 image string
+		 * @returns base64 image string, and on error empty string
+		 */
+		getAlbumThumbnailBase64(albumId: string): Promise<string>;
+
+		/**
+		 * Queries album from database (including photos)
+		 */
+		getAlbum(albumId: string): Promise<album>;
 	};
 }

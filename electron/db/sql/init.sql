@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS albums (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS photos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     file_path TEXT NOT NULL,
     rating REAL,
-    last_displayed INTEGER,
-    album_id TEXT FOREIGN KEY NOT NULL,
-    FOREIGN KEY (album_id) REFERENCES album(id) ON DELETE CASCADE
+    last_displayed DATETIME,
+    album_id TEXT NOT NULL,
+    PRIMARY KEY (file_path, album_id),
+    FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE
 );

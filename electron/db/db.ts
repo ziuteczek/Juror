@@ -4,11 +4,10 @@ import getAlbumDataQuery from "./sql/get.album.data.sql?raw";
 import deleteAlbumQuery from "./sql/delete.album.sql?raw";
 import getAlbumQuery from "./sql/get.album.sql?raw";
 import getAlbumsDataList from "./sql/get.albums.data.list.sql?raw";
-import getAlbumThumnailPathQuery from "./sql/get.album.thumbnail.path.sql?raw";
+import getAlbumThumbnailPathQuery from "./sql/get.album.thumbnail.path.sql?raw";
 import Database from "better-sqlite3";
 import { dbFileName } from "../../src/env";
 import { randomUUID } from "node:crypto";
-import { album, albumData, returnWrapper } from "./types.database";
 
 /**
  * Initialized database
@@ -21,7 +20,7 @@ const queries = {
 	getAlbumData: db.prepare(getAlbumDataQuery),
 	deleteAlbumData: db.prepare(deleteAlbumQuery),
 	getAlbum: db.prepare(getAlbumQuery),
-	getAlbumThumnailPath: db.prepare(getAlbumThumnailPathQuery),
+	getAlbumThumbnailPath: db.prepare(getAlbumThumbnailPathQuery),
 	getAlbumsDataList: db.prepare(getAlbumsDataList),
 };
 
@@ -96,12 +95,12 @@ const dbDeleteAlbum = (albumId: string): returnWrapper<null> => {
 };
 
 /**
- * Queries first photo from the album sorted by photos id
+ * Queries first photo from the album, sorted by photos id
  * @returns photo path
  */
 const dbGetThumbnailPath = (albumId: string): returnWrapper<string> => {
 	try {
-		const row = queries.getAlbumThumnailPath.get(albumId) as {
+		const row = queries.getAlbumThumbnailPath.get({ album_id: albumId }) as {
 			file_path: string;
 		};
 

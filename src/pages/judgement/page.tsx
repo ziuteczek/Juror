@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import type { photoData, currPhotoData } from "./types";
-import getAlbumData from "./utils/get.album.data";
-
 import FinishModal from "./components/finish.modal";
 import JudgementImage from "./components/image";
 import { devMode } from "../../env";
 import SelectRating from "./components/select.rating";
 import ChangePhotos from "./components/change.photos";
 import ExitJudgement from "./components/exit";
+import { currPhotoData } from "./types";
 
 /**
  * It's judging album given in search params under the key "album".
  */
 export default function Judgement() {
-	const [albumData, setAlbumData] = useState<photoData[]>([]);
+	const [albumData, setAlbumData] = useState<photo[]>([]);
+	const [maxRating, setMaxRating] = useState(0);
 	const [searchParams] = useSearchParams();
 	const albumTitle = searchParams.get("album");
 	const naviate = useNavigate();
@@ -32,8 +31,9 @@ export default function Judgement() {
 		}
 
 		(async () => {
-			const data = await getAlbumData(albumTitle);
-			setAlbumData(data);
+			const data = await window.ipcRenderer.getAlbum(albumTitle);
+			setAlbumData(data.photos);
+			setMaxRating(data.maxRating);
 		})();
 	}, [albumTitle]);
 
@@ -111,6 +111,7 @@ export default function Judgement() {
 				<SelectRating
 					albumData={albumData}
 					currPhoto={currPhoto}
+					maxRating={maxRating}
 					setAlbumData={setAlbumData}
 				/>
 				<ChangePhotos

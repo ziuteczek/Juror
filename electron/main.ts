@@ -16,9 +16,10 @@ import {
 } from "./db/db";
 
 const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // electron-router-dom expects CommonJS-style `require` in the main process.
 globalThis.require = require;
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // The built directory structure
 //
@@ -111,7 +112,7 @@ async function imagePathToBase64(photoPath: string): Promise<string> {
 }
 
 ipcMain.handle("photo-to-base-64", async (_, photoPath: string) => {
-	return imagePathToBase64(photoPath);
+	return await imagePathToBase64(photoPath);
 });
 
 ipcMain.handle("get-album", (_, albumId: string) => {
