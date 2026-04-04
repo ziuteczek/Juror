@@ -4,6 +4,7 @@ import getAlbumDataQuery from "./sql/get.album.data.sql?raw";
 import deleteAlbumQuery from "./sql/delete.album.sql?raw";
 import getAlbumsDataList from "./sql/get.albums.data.list.sql?raw";
 import getAlbumThumbnailPathQuery from "./sql/get.album.thumbnail.path.sql?raw";
+import insertPhotosQuery from "./sql/insert.photos.sql?raw";
 import getPhotosQuery from "./sql/get.photos.sql?raw";
 import Database from "better-sqlite3";
 import { dbFileName, devMode } from "../../src/env";
@@ -22,6 +23,7 @@ const queries = {
 	getAlbumThumbnailPath: db.prepare(getAlbumThumbnailPathQuery),
 	getAlbumsDataList: db.prepare(getAlbumsDataList),
 	getPhotos: db.prepare(getPhotosQuery),
+	insertPhotos: db.prepare(insertPhotosQuery),
 };
 
 /**
@@ -72,8 +74,10 @@ const dbGetAlbumData = (albumId: string): returnWrapper<albumData> => {
  */
 const dbGetAlbum = (albumId: string): returnWrapper<album> => {
 	try {
-		const albumData = queries.getAlbumData.get(albumId) as albumData;
-		const photos = queries.getPhotos.all(albumId) as photo[];
+		const albumData = queries.getAlbumData.get({
+			id: albumId,
+		}) as albumData;
+		const photos = queries.getPhotos.all({ album_id: albumId }) as photo[];
 
 		const album = {
 			...albumData,
@@ -142,6 +146,29 @@ const dbGetAlbumsDataList = (): returnWrapper<albumData[]> => {
 	}
 };
 
+const dbInsertPhotos = (
+	albumId: string,
+	photosPaths: string[],
+): returnWrapper<photo[]> => {
+	console.log(albumId, photosPaths);
+	try {
+		const photosData = photosPaths.map((photoPath) => ({
+			file_path: photoPath,
+			album_id: albumId,
+		}));
+
+		const photos = photosData.map((data) =>
+			queries.insertPhotos.get(data),
+		) as photo[];
+		return { success: true, data: photos, error: null };
+	} catch (err) {
+		if (devMode) {
+			console.error(err);
+		}
+		return { success: false, data: null, error: null };
+	}
+};
+
 export {
 	db,
 	dbCreateAlbum,
@@ -150,4 +177,5 @@ export {
 	dbGetAlbum,
 	dbGetThumbnailPath,
 	dbGetAlbumsDataList,
+	dbInsertPhotos,
 };

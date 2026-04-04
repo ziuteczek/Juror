@@ -44,4 +44,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	selectImagesDialog() {
 		return ipcRenderer.invoke("select-images");
 	},
+	insertImages(albumId: string, imagesPaths: string[]) {
+		return ipcRenderer.invoke("insert-images", albumId, imagesPaths);
+	},
 });

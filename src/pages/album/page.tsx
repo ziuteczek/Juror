@@ -92,8 +92,13 @@ export default function Album() {
 
 				{/* open directory */}
 				<button
-					onClick={() => {
-						window.ipcRenderer.selectImagesDialog();
+					onClick={async () => {
+						const imagesPaths =
+							await window.ipcRenderer.selectImagesDialog();
+						await window.ipcRenderer.insertImages(
+							albumId,
+							imagesPaths,
+						);
 					}}
 					className="flex items-center justify-center w-50 h-50 bg-yellow-600 mt-6 flex-col cursor-pointer"
 				>

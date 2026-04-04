@@ -14,7 +14,9 @@ import {
 	dbGetThumbnailPath,
 	dbGetAlbumsDataList,
 	db,
+	dbInsertPhotos,
 } from "./db/db";
+import { devMode } from "../src/env";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -92,6 +94,18 @@ app.on("activate", () => {
 		createWindow();
 	}
 });
+
+const isFile = async (path: string) => {
+	try {
+		await readFile(path);
+		return true;
+	} catch (err) {
+		if (devMode) {
+			console.log(err);
+		}
+		return false;
+	}
+};
 
 /**
  * Transforms image from given path to base 64 string
@@ -171,7 +185,7 @@ ipcMain.handle("select-images", async () => {
 		properties: ["multiSelections", "openFile"],
 		filters: [
 			{
-				name: "Images [jpg, jpeg, png]",
+				name: "Images (jpg, jpeg, png)",
 				extensions: ["png", "jpeg", "jpg"],
 			},
 		],
@@ -179,5 +193,23 @@ ipcMain.handle("select-images", async () => {
 
 	return resoult.filePaths;
 });
+
+ipcMain.handle(
+	"insert-images",
+	async (_, albumId: string, imagesPaths: string[]) => {
+		const existingImages = imagesPaths.filter(
+			async (imagePath) => await isFile(imagePath),
+		);
+
+		const missingImagesCount =
+			existingImages.length - existingImages.length;
+
+		if (missingImagesCount) {
+			alert(`Cound't read ${missingImagesCount} images`);
+		}
+
+		return dbInsertPhotos(albumId, existingImages);
+	},
+);
 
 app.whenReady().then(createWindow);

@@ -90,6 +90,16 @@ interface Window {
 		 * Opens window allowing user to select photos with .png, .jpg and .jpeg extensions
 		 * @returns absolute paths to selected photos
 		 */
-		selectImagesDialog(): Promise<string[]>
+		selectImagesDialog(): Promise<string[]>;
+
+		/**
+		 * Inserts readable images with given paths to the database
+		 * 
+		 * In case if any photo is unreadable, alert() is displayed with message containing number of unreadable images
+		 * 
+		 * @param imagesPaths Absolute paths of images to insert
+		 * @returns objects of succesfully inserted photos
+		 */
+		insertImages(albumId: string, imagesPaths: string[]);
 	};
 }
