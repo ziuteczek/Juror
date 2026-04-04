@@ -24,17 +24,27 @@ declare namespace NodeJS {
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
 	ipcRenderer: import("electron").IpcRenderer & {
-		getOfflineGalleryData(): Promise<
-			Array<{ name: string; path: string; thumbnail: string }>
-		>;
-		getOfflineAlbumPhotosList(albumPath: string): Promise<string[]>;
-		getAlbumData(albumPath: string): Promise<albumData[]>;
+		/**
+		 * Queries albums list from database
+		 * @returns album data array (without photos)
+		 */
+		getAlbumsData(): albumData[];
+
+		/**
+		 * Convers given photo to base64 string
+		 * @param photoPath Absolute path to the photo
+		 * @returns base64 string image or empty string on error
+		 */
 		photoToBase64(photoPath: string): Promise<string>;
-		saveAlbumData(albumPath: string, albumData: albumData[]): boolean;
-		resetAlbumData(albumPath: string): boolean;
-		exportAlbumData(albumData: albumData[]): Promise<boolean>;
-		createAlbum(albumName: string): Promise<string>;
-		openAlbumDirectory(albumName: string): Promise<boolean>;
-		deleteAlbum(albumPath: string): Promise<boolean>;
+		/**
+		 * Creates album inside database.
+		 * @param albumName Name of an album.
+		 * @param maxRating Maximum rating that photo can achive in given album.
+		 */
+		createAlbum(albumName: string, maxRating: number): string;
+		/**
+		 * Deletes given album from database (it won't delete photos files)
+		 */
+		deleteAlbum(albumId: string): boolean;
 	};
 }

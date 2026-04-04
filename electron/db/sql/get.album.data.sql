@@ -1,0 +1,1 @@
+SELECT * FROM albums WHERE albums.id = $id;

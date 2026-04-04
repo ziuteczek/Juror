@@ -1,5 +1,4 @@
 import { ipcRenderer, contextBridge } from "electron";
-import { photoData } from "../src/pages/judgement/types";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -21,34 +20,19 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 		const [channel, ...omit] = args;
 		return ipcRenderer.invoke(channel, ...omit);
 	},
-	getOfflineGalleryData() {
-		return ipcRenderer.invoke("get-offline-gallery-data");
-	},
-	getOfflineAlbumPhotosList(albumPath: string) {
-		return ipcRenderer.invoke("get-offline-album-photos-list", albumPath);
-	},
-	getAlbumData(albumPath: string) {
-		return ipcRenderer.invoke("get-album-data", albumPath);
-	},
+
+	// Non build in stuff :D
+
 	photoToBase64(photoPath: string) {
 		return ipcRenderer.invoke("photo-to-base-64", photoPath);
 	},
-	saveAlbumData(albumPath: string, albumData: photoData[]) {
-		return ipcRenderer.invoke("save-album-data", albumPath, albumData);
+	createAlbum(albumName: string, maxRating: number) {
+		return ipcRenderer.invoke("create-album", albumName, maxRating);
 	},
-	resetAlbumData(albumPath: string) {
-		return ipcRenderer.invoke("reset-album-data", albumPath);
+	deleteAlbum(albumId: string) {
+		return ipcRenderer.invoke("delete-album", albumId);
 	},
-	exportAlbumData(albumData: photoData[]) {
-		return ipcRenderer.invoke("export-album-data", albumData);
-	},
-	createAlbum(albumName: string) {
-		return ipcRenderer.invoke("create-album", albumName);
-	},
-	openAlbumDirectory(albumName: string) {
-		return ipcRenderer.invoke("open-album-directory", albumName);
-	},
-	async deleteAlbum(albumPath: string): Promise<string> {
-		return ipcRenderer.invoke("delete-album", albumPath);
+	getAlbumsData() {
+		return ipcRenderer.invoke("get-albums-data-list");
 	},
 });
