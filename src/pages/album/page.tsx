@@ -92,7 +92,9 @@ export default function Album() {
 
 				{/* open directory */}
 				<button
-					onClick={() => {}}
+					onClick={() => {
+						window.ipcRenderer.selectImagesDialog();
+					}}
 					className="flex items-center justify-center w-50 h-50 bg-yellow-600 mt-6 flex-col cursor-pointer"
 				>
 					<img src={directoryIcon} alt="open directory icon" />

@@ -85,5 +85,11 @@ interface Window {
 		 * Queries album from database (including photos)
 		 */
 		getAlbum(albumId: string): Promise<album>;
+
+		/**
+		 * Opens window allowing user to select photos with .png, .jpg and .jpeg extensions
+		 * @returns absolute paths to selected photos
+		 */
+		selectImagesDialog(): Promise<string[]>
 	};
 }

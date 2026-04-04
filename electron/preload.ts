@@ -41,4 +41,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	getAlbum(albumId: string) {
 		return ipcRenderer.invoke("get-album", albumId);
 	},
+	selectImagesDialog() {
+		return ipcRenderer.invoke("select-images");
+	},
 });

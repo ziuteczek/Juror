@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -13,6 +13,7 @@ import {
 	dbGetAlbumData,
 	dbGetThumbnailPath,
 	dbGetAlbumsDataList,
+	db,
 } from "./db/db";
 
 const require = createRequire(import.meta.url);
@@ -79,6 +80,7 @@ function createWindow() {
 app.on("window-all-closed", () => {
 	if (process.platform !== "darwin") {
 		app.quit();
+		db.close();
 		win = null;
 	}
 });
@@ -158,6 +160,24 @@ ipcMain.handle("get-albums-data-list", () => {
 	}
 
 	return data;
+});
+
+ipcMain.handle("select-images", async () => {
+	if (!win) {
+		throw new Error("Window is not initialized!");
+	}
+	const resoult = await dialog.showOpenDialog(win, {
+		title: "Select images or directory with images to rate",
+		properties: ["multiSelections", "openFile"],
+		filters: [
+			{
+				name: "Images [jpg, jpeg, png]",
+				extensions: ["png", "jpeg", "jpg"],
+			},
+		],
+	});
+
+	return resoult.filePaths;
 });
 
 app.whenReady().then(createWindow);
