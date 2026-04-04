@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import leftArrow from "../../assets/left.arrow.icon.svg";
 import PhotoThumbnail from "./components/photo.thumbnail";
-import resetPhotos from "./utils/reset";
-import deleteAlbum from "./utils/delete";
 import trashIcon from "../../assets/trash.icon.svg";
 import resetIcon from "../../assets/reset.icon.svg";
 import directoryIcon from "../../assets/directory.icon.svg";
@@ -35,6 +33,8 @@ export default function Album() {
 		(async () => {
 			const data = await window.ipcRenderer.getAlbum(albumId);
 			setPhotos(data.photos);
+			console.log(data);
+			console.log("data.photos", data.photos);
 			const { photos, ...albumData } = data;
 			setAlbumData(albumData);
 		})();
@@ -47,27 +47,27 @@ export default function Album() {
 
 	const handleResetBtn = async () => {
 		const confirm = window.confirm(
-			"Do you want to erase all of your data, regarding this album? (photos won't be deleted)",
+			"Do you want to reset all of your ratings from this album?",
 		);
 
 		if (!confirm) {
 			return;
 		}
 
-		await resetPhotos(albumId);
+		// await resetPhotos(albumId);
 		navigate("/");
 	};
 
 	const handleDeleteBtn = async () => {
 		const confirm = window.confirm(
-			"Do you want to erase all of you data, regarding this album? (photos will be deleted!)",
+			"Do you want to erase all of you data, regarding this album? (photos won't be deleted!)",
 		);
 
 		if (!confirm) {
 			return;
 		}
 
-		await deleteAlbum(albumId);
+		await window.ipcRenderer.deleteAlbum(albumId);
 		navigate("/");
 	};
 
@@ -123,12 +123,11 @@ export default function Album() {
 					/>
 				</button>
 
-				{photos.map(({ title, path, rating }) => (
+				{photos.map(({ path, rating }) => (
 					<PhotoThumbnail
-						name={title}
 						path={path}
 						maxRating={albumData?.maxRating}
-						rootPath={albumId}
+						// albumId={albumId}
 						rating={rating}
 					/>
 				))}

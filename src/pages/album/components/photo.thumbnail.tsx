@@ -4,16 +4,14 @@ import photoToBase64 from "../../judgement/utils/photo.to.base64";
 import { Link } from "react-router-dom";
 
 export default function PhotoThumbnail({
-	name,
 	path,
 	rating,
-	rootPath,
+	// albumId,
 	maxRating,
 }: {
-	name: string;
 	path: string;
 	rating: number | null;
-	rootPath: string;
+	// albumId: string;
 	maxRating: number;
 }) {
 	const { ref, inView } = useInView();
@@ -36,11 +34,10 @@ export default function PhotoThumbnail({
 		})();
 	}, [path, inView]);
 
-	console.log(rootPath);
 
 	return (
-		<Link to={"/"} ref={ref} key={name}>
-			<h3>{name}</h3>
+		<Link to={"/"} ref={ref} key={path}>
+			<h3>{path}</h3>
 			<img
 				src={photoBase64}
 				className="max-w-50 max-h-50 size-full object-cover"

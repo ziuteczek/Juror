@@ -2,11 +2,11 @@ import initQuery from "./sql/init.sql?raw";
 import createAlbumQuery from "./sql/create.album.sql?raw";
 import getAlbumDataQuery from "./sql/get.album.data.sql?raw";
 import deleteAlbumQuery from "./sql/delete.album.sql?raw";
-import getAlbumQuery from "./sql/get.album.sql?raw";
 import getAlbumsDataList from "./sql/get.albums.data.list.sql?raw";
 import getAlbumThumbnailPathQuery from "./sql/get.album.thumbnail.path.sql?raw";
+import getPhotosQuery from "./sql/get.photos.sql?raw";
 import Database from "better-sqlite3";
-import { dbFileName } from "../../src/env";
+import { dbFileName, devMode } from "../../src/env";
 import { randomUUID } from "node:crypto";
 
 /**
@@ -19,9 +19,9 @@ const queries = {
 	createAlbum: db.prepare(createAlbumQuery),
 	getAlbumData: db.prepare(getAlbumDataQuery),
 	deleteAlbumData: db.prepare(deleteAlbumQuery),
-	getAlbum: db.prepare(getAlbumQuery),
 	getAlbumThumbnailPath: db.prepare(getAlbumThumbnailPathQuery),
 	getAlbumsDataList: db.prepare(getAlbumsDataList),
+	getPhotos: db.prepare(getPhotosQuery),
 };
 
 /**
@@ -41,7 +41,9 @@ const dbCreateAlbum = (
 		});
 		return { success: true, data: newAlbumId, error: null };
 	} catch (err) {
-		console.error(err);
+		if (devMode) {
+			console.error(err);
+		}
 		return { success: false, error: err, data: null };
 	}
 };
@@ -57,7 +59,9 @@ const dbGetAlbumData = (albumId: string): returnWrapper<albumData> => {
 		}) as albumData;
 		return { success: true, data: albumData, error: null };
 	} catch (err) {
-		console.error(err);
+		if (devMode) {
+			console.error(err);
+		}
 		return { success: false, error: err, data: null };
 	}
 };
@@ -68,10 +72,19 @@ const dbGetAlbumData = (albumId: string): returnWrapper<albumData> => {
  */
 const dbGetAlbum = (albumId: string): returnWrapper<album> => {
 	try {
-		const album = queries.getAlbum.get({ album_id: albumId }) as album;
+		const albumData = queries.getAlbumData.get(albumId) as albumData;
+		const photos = queries.getPhotos.all(albumId) as photo[];
+
+		const album = {
+			...albumData,
+			photos,
+		};
+
 		return { success: true, data: album, error: null };
 	} catch (err) {
-		console.error(err);
+		if (devMode) {
+			console.error(err);
+		}
 		return { success: false, error: err, data: null };
 	}
 };
@@ -89,7 +102,9 @@ const dbDeleteAlbum = (albumId: string): returnWrapper<null> => {
 
 		return { success: true, data: null, error: null };
 	} catch (err) {
-		console.error(err);
+		if (devMode) {
+			console.error(err);
+		}
 		return { success: false, error: err, data: null };
 	}
 };
@@ -100,13 +115,17 @@ const dbDeleteAlbum = (albumId: string): returnWrapper<null> => {
  */
 const dbGetThumbnailPath = (albumId: string): returnWrapper<string> => {
 	try {
-		const row = queries.getAlbumThumbnailPath.get({ album_id: albumId }) as {
-			file_path: string;
+		const row = queries.getAlbumThumbnailPath.get({
+			album_id: albumId,
+		}) as {
+			filePath: string;
 		};
 
-		return { success: true, data: row?.file_path as string, error: null };
+		return { success: true, data: row.filePath, error: null };
 	} catch (err) {
-		console.error(err);
+		if (devMode) {
+			console.error(err);
+		}
 		return { success: false, error: err, data: null };
 	}
 };
@@ -116,7 +135,9 @@ const dbGetAlbumsDataList = (): returnWrapper<albumData[]> => {
 		const data = queries.getAlbumsDataList.all() as albumData[];
 		return { success: true, data, error: null };
 	} catch (err) {
-		console.error(err);
+		if (devMode) {
+			console.error(err);
+		}
 		return { success: false, data: null, error: err };
 	}
 };

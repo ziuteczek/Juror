@@ -73,7 +73,7 @@ interface Window {
 		/**
 		 * Deletes given album from database (it won't delete photos files)
 		 */
-		deleteAlbum(albumId: string): boolean;
+		deleteAlbum(albumId: string): Promise<boolean>;
 
 		/**
 		 * Queries first photo from album, reads it and converts to base64 image string
