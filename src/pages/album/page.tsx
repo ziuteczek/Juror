@@ -54,8 +54,8 @@ export default function Album() {
 			return;
 		}
 
-		// await resetPhotos(albumId);
-		navigate("/");
+		await window.ipcRenderer.resetAlbumPhotosRating(albumId);
+		window.location.reload();
 	};
 
 	const handleDeleteBtn = async () => {

@@ -1,7 +1,20 @@
 import { Link } from "react-router-dom";
 import flowers from "../../../assets/flowers.svg";
-export default function FinishModal({ albumData }: { albumData: photo[] }) {
-	const end = albumData.every((photo) => !!photo.rating);
+import { useEffect } from "react";
+export default function FinishModal({
+	albumId,
+	photos,
+}: {
+	albumId: string;
+	photos: photo[];
+}) {
+	const end = photos.every((photo) => !!photo.rating);
+
+	useEffect(() => {
+		if (end) {
+			window.ipcRenderer.updatePhotosRating(albumId, photos);
+		}
+	}, [end]);
 
 	if (!end) {
 		return <></>;
@@ -19,7 +32,7 @@ export default function FinishModal({ albumData }: { albumData: photo[] }) {
 				alt="flowers"
 			/>
 			<p className="text-lg text-center">
-				You finished rating all of your {albumData.length} photos
+				You finished rating all of your {photos.length} photos
 			</p>
 			<div className="flex flex-col items-center gap-2">
 				<Link
@@ -28,10 +41,7 @@ export default function FinishModal({ albumData }: { albumData: photo[] }) {
 				>
 					Back to the gallery
 				</Link>
-				<button
-					className="block bg-green-500 w-full py-2 text-center cursor-pointer"
-					// onClick={() => exportAlbumData(albumData)}
-				>
+				<button className="block bg-green-500 w-full py-2 text-center cursor-pointer">
 					Export resoults
 				</button>
 			</div>

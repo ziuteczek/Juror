@@ -16,6 +16,7 @@ import {
 	db,
 	dbInsertPhotos,
 	dbUpdatePhotosRating,
+	dbResetAlbumsPhotosRatings,
 } from "./db/db";
 import { devMode } from "../src/env";
 
@@ -220,5 +221,10 @@ ipcMain.handle(
 		return success;
 	},
 );
+
+ipcMain.handle("reset-album-photos-rating", (_, albumId: string) => {
+	const { success } = dbResetAlbumsPhotosRatings(albumId);
+	return success;
+});
 
 app.whenReady().then(createWindow);

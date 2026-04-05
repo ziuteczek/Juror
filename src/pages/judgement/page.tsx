@@ -117,9 +117,8 @@ export default function Judgement() {
 					setCurrPhoto={setCurrPhoto}
 				/>
 				<ExitJudgement albumId={albumId} photos={albumData} />
-				{/* <img src={settingsIcon} alt="" /> */}
 			</div>
-			<FinishModal albumData={albumData} />
+			<FinishModal photos={albumData} albumId={albumId} />
 		</div>
 	);
 }

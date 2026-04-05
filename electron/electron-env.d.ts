@@ -111,5 +111,11 @@ interface Window {
 		 * @returns **true** on succes, **false** on error
 		 */
 		updatePhotosRating(albumId: string, photos: photo[]): Promise<boolean>;
+
+		/**
+		 * Resets all photos: rating, last_displayed from given album
+		 * @returns **true** on succes, **false** on failure 
+		 */
+		resetAlbumPhotosRating(albumId: string): Promise<boolean>;
 	};
 }

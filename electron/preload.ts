@@ -50,4 +50,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	updatePhotosRating(albumId: string, photos: photo[]) {
 		return ipcRenderer.invoke("update-photos-rating", albumId, photos);
 	},
+	resetAlbumPhotosRating(albumId: string) {
+		return ipcRenderer.invoke("reset-album-photos-rating", albumId);
+	},
 });

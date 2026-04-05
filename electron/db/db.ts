@@ -13,6 +13,7 @@ import getAlbumThumbnailPathQuery from "./sql/get.album.thumbnail.path.sql?raw";
 import insertPhotosQuery from "./sql/insert.photos.sql?raw";
 import getPhotosQuery from "./sql/get.photos.sql?raw";
 import updatePhotoRatingQuery from "./sql/update.photo.rating.sql?raw";
+import resetAlbumPhotosRatingsQuery from "./sql/reset.album.photos.ratings.sql?raw";
 
 /**
  * Initialized database
@@ -29,6 +30,7 @@ const queries = {
 	getPhotos: db.prepare(getPhotosQuery),
 	insertPhotos: db.prepare(insertPhotosQuery),
 	updatePhotoRating: db.prepare(updatePhotoRatingQuery),
+	resetAlbumPhotosRatings: db.prepare(resetAlbumPhotosRatingsQuery),
 };
 
 /**
@@ -192,9 +194,21 @@ const dbUpdatePhotosRating = (
 				album_id: albumId,
 				file_path: photo.filePath,
 				rating: photo.rating,
-				last_displayed: photo.lastDisplayed,
+				last_displayed: photo.lastDisplayed?.toISOString(),
 			});
 		});
+		return { success: true, data: null, error: null };
+	} catch (err) {
+		if (devMode) {
+			console.error(err);
+		}
+		return { success: false, data: null, error: err };
+	}
+};
+
+const dbResetAlbumsPhotosRatings = (albumId: string): returnWrapper<null> => {
+	try {
+		queries.resetAlbumPhotosRatings.run({ album_id: albumId });
 		return { success: true, data: null, error: null };
 	} catch (err) {
 		if (devMode) {
@@ -214,4 +228,5 @@ export {
 	dbGetAlbumsDataList,
 	dbInsertPhotos,
 	dbUpdatePhotosRating,
+	dbResetAlbumsPhotosRatings,
 };
