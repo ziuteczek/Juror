@@ -32,7 +32,7 @@ export default function Album() {
 
 		(async () => {
 			const data = await window.ipcRenderer.getAlbum(albumId);
-			console.log("data", data);
+
 			setPhotos(data.photos);
 
 			const { photos, ...albumData } = data;
@@ -70,8 +70,6 @@ export default function Album() {
 		await window.ipcRenderer.deleteAlbum(albumId);
 		navigate("/");
 	};
-
-	console.log(photos);
 
 	return (
 		<>

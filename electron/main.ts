@@ -103,7 +103,7 @@ const isFile = async (path: string) => {
 		return true;
 	} catch (err) {
 		if (devMode) {
-			console.log(err);
+			console.error(err);
 		}
 		return false;
 	}

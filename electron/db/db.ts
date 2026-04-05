@@ -139,7 +139,7 @@ const dbGetThumbnailPath = (albumId: string): returnWrapper<string> => {
 		}) as {
 			filePath: string;
 		};
-		console.log(row);
+
 		return { success: true, data: row.filePath, error: null };
 	} catch (err) {
 		if (devMode) {
@@ -165,7 +165,6 @@ const dbInsertPhotos = (
 	albumId: string,
 	photosPaths: string[],
 ): returnWrapper<photo[]> => {
-	console.log(albumId, photosPaths);
 	try {
 		const photosData = photosPaths.map((photoPath) => ({
 			file_path: photoPath,

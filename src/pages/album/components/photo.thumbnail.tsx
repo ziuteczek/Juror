@@ -18,7 +18,6 @@ export default function PhotoThumbnail({
 	const { ref, inView } = useInView();
 	const [photoBase64, setPhotoBase64] = useState("");
 
-	console.log("path", path);
 	useEffect(() => {
 		(async () => {
 			if (!inView) {

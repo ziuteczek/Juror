@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { devMode } from "../../env";
 import AlbumThumbnail from "./components/album.thumbnail";
 import plusIcon from "../../assets/plus.icon.svg";
 import CreateAlbumModal from "./components/create.album.modal";
@@ -14,9 +13,6 @@ export default function Gallery() {
 	useEffect(() => {
 		(async () => {
 			const galleriesData = await window.ipcRenderer.getAlbumsData();
-			if (devMode) {
-				console.log(galleriesData);
-			}
 			setGalleries(galleriesData);
 		})();
 	}, []);

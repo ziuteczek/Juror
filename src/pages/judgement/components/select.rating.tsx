@@ -3,18 +3,18 @@ import { currPhotoData } from "../types";
 import { Dispatch, SetStateAction, useCallback, useEffect } from "react";
 
 export default function SelectRating({
-	albumData,
+	photos,
 	currPhoto,
 	maxRating,
-	setAlbumData,
+	setPhoto,
 }: {
-	albumData: photo[];
+	photos: photo[];
 	currPhoto: currPhotoData;
 	maxRating: number;
-	setAlbumData: Dispatch<SetStateAction<photo[]>>;
+	setPhoto: Dispatch<SetStateAction<photo[]>>;
 }) {
 	const ratePhoto = (rating: number | null) =>
-		setAlbumData((prev) =>
+		setPhoto((prev) =>
 			prev.map((photo, photoIndex) =>
 				photoIndex === currPhoto.index
 					? { ...photo, rating }
@@ -23,7 +23,7 @@ export default function SelectRating({
 		);
 	const ratePhotoCallback = useCallback(ratePhoto, [
 		currPhoto.index,
-		setAlbumData,
+		setPhoto,
 	]);
 
 	useEffect(() => {
@@ -55,12 +55,9 @@ export default function SelectRating({
 	}, [ratePhotoCallback]);
 
 	return (
-		<form
-			className="flex flex-col gap-5 items-center"
-			onKeyDown={(e) => console.log(e)}
-		>
+		<form className="flex flex-col gap-5 items-center">
 			{Array.from({ length: maxRating }, (_, i) => {
-				const isSelected = albumData[currPhoto.index].rating === i + 1;
+				const isSelected = photos[currPhoto.index].rating === i + 1;
 
 				return (
 					<Fragment key={i}>

@@ -4,12 +4,12 @@ import { currPhotoData } from "../types";
 export default function ChangePhotos({
 	currPhoto,
 	albumData,
-	setAlbumData,
+	setPhotos,
 	setCurrPhoto,
 }: {
 	currPhoto: currPhotoData;
 	albumData: photo[];
-	setAlbumData: Dispatch<SetStateAction<photo[]>>;
+	setPhotos: Dispatch<SetStateAction<photo[]>>;
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
 	// const [nextPhotoPossible, setNextPhotoPossible] = useState(false);
@@ -47,7 +47,7 @@ export default function ChangePhotos({
 			return;
 		}
 
-		setAlbumData((prev) =>
+		setPhotos((prev) =>
 			prev.map((photo, index) =>
 				index === currPhoto.index
 					? { ...photo, lastDisplayed: new Date() }
