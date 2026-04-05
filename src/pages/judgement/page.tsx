@@ -16,7 +16,7 @@ export default function Judgement() {
 	const [albumData, setAlbumData] = useState<photo[]>([]);
 	const [maxRating, setMaxRating] = useState(0);
 	const [searchParams] = useSearchParams();
-	const albumTitle = searchParams.get("album");
+	const albumId = searchParams.get("album");
 	const naviate = useNavigate();
 
 	const [currPhoto, setCurrPhoto] = useState<currPhotoData>({
@@ -26,16 +26,16 @@ export default function Judgement() {
 
 	//Initial album load
 	useEffect(() => {
-		if (!albumTitle) {
+		if (!albumId) {
 			return;
 		}
 
 		(async () => {
-			const data = await window.ipcRenderer.getAlbum(albumTitle);
+			const data = await window.ipcRenderer.getAlbum(albumId);
 			setAlbumData(data.photos);
 			setMaxRating(data.maxRating);
 		})();
-	}, [albumTitle]);
+	}, [albumId]);
 
 	// If photo is not chosen, it selects next one
 	useEffect(() => {
@@ -48,15 +48,15 @@ export default function Judgement() {
 		const earliestSkippedPhotoDateEpoch = Math.min(
 			...albumData
 				.filter((photo) => !photo.rating)
-				.map((photo) => photo.lastTimeDisplayed?.getTime())
+				.map((photo) => photo.lastDisplayed?.getTime())
 				.filter((time): time is number => time !== undefined),
 		);
 
 		const earliestSkippedPhotoIndex = albumData
-			.filter((photo) => photo.lastTimeDisplayed)
+			.filter((photo) => photo.lastDisplayed)
 			.findIndex(
 				(photo) =>
-					photo.lastTimeDisplayed?.getTime() ===
+					photo.lastDisplayed?.getTime() ===
 					earliestSkippedPhotoDateEpoch,
 			);
 
@@ -86,7 +86,7 @@ export default function Judgement() {
 		}
 	}, [albumData, currPhoto.index]);
 
-	if (!albumTitle) {
+	if (!albumId) {
 		naviate("/");
 		return <></>;
 	}
@@ -116,7 +116,7 @@ export default function Judgement() {
 					setAlbumData={setAlbumData}
 					setCurrPhoto={setCurrPhoto}
 				/>
-				<ExitJudgement albumPath={albumTitle} />
+				<ExitJudgement albumId={albumId} photos={albumData} />
 				{/* <img src={settingsIcon} alt="" /> */}
 			</div>
 			<FinishModal albumData={albumData} />

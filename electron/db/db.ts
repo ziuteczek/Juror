@@ -1,3 +1,9 @@
+import Database from "better-sqlite3";
+import { dbFileName, devMode } from "../../src/env";
+import { randomUUID } from "node:crypto";
+import path from "node:path";
+
+// Queries
 import initQuery from "./sql/init.sql?raw";
 import createAlbumQuery from "./sql/create.album.sql?raw";
 import getAlbumDataQuery from "./sql/get.album.data.sql?raw";
@@ -6,10 +12,7 @@ import getAlbumsDataList from "./sql/get.albums.data.list.sql?raw";
 import getAlbumThumbnailPathQuery from "./sql/get.album.thumbnail.path.sql?raw";
 import insertPhotosQuery from "./sql/insert.photos.sql?raw";
 import getPhotosQuery from "./sql/get.photos.sql?raw";
-import Database from "better-sqlite3";
-import { dbFileName, devMode } from "../../src/env";
-import { randomUUID } from "node:crypto";
-import path from "node:path";
+import updatePhotoRatingQuery from "./sql/update.photo.rating.sql?raw";
 
 /**
  * Initialized database
@@ -25,6 +28,7 @@ const queries = {
 	getAlbumsDataList: db.prepare(getAlbumsDataList),
 	getPhotos: db.prepare(getPhotosQuery),
 	insertPhotos: db.prepare(insertPhotosQuery),
+	updatePhotoRating: db.prepare(updatePhotoRatingQuery),
 };
 
 /**
@@ -178,6 +182,28 @@ const dbInsertPhotos = (
 	}
 };
 
+const dbUpdatePhotosRating = (
+	albumId: string,
+	photos: photo[],
+): returnWrapper<null> => {
+	try {
+		photos.forEach((photo) => {
+			queries.updatePhotoRating.run({
+				album_id: albumId,
+				file_path: photo.filePath,
+				rating: photo.rating,
+				last_displayed: photo.lastDisplayed,
+			});
+		});
+		return { success: true, data: null, error: null };
+	} catch (err) {
+		if (devMode) {
+			console.error(err);
+		}
+		return { success: false, data: null, error: err };
+	}
+};
+
 export {
 	db,
 	dbCreateAlbum,
@@ -187,4 +213,5 @@ export {
 	dbGetThumbnailPath,
 	dbGetAlbumsDataList,
 	dbInsertPhotos,
+	dbUpdatePhotosRating,
 };

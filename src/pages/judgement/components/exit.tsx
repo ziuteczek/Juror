@@ -1,21 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import exitIcon from "../../../assets/exit.icon.svg";
 
-
 export default function ExitJudgement({
-	albumPath,
-	// albumData,
+	albumId,
+	photos,
 }: {
-	albumPath: string;
-	// albumData: photo[];
+	albumId: string;
+	photos: photo[];
 }) {
 	const navigate = useNavigate();
 
 	const saveData = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
 		e.preventDefault();
 		(async () => {
-			// await saveAlbumData(albumPath, albumData);
-			navigate(`/album?album=${albumPath}`);
+			await window.ipcRenderer.updatePhotosRating(albumId, photos);
+			navigate(`/album?album=${albumId}`);
 		})();
 	};
 

@@ -15,7 +15,7 @@ interface photo {
 	filePath: string;
 	fileName: string;
 	rating: number | null;
-	lastTimeDisplayed: Date | null;
+	lastDisplayed: Date | null;
 }
 
 interface albumData {
@@ -55,7 +55,7 @@ interface Window {
 	ipcRenderer: import("electron").IpcRenderer & {
 		/**
 		 * Queries albums list from database
-		 * @returns album data array (without photos)
+		 * @returns album data array **(without photos)**
 		 */
 		getAlbumsData(): Promise<albumData[]>;
 
@@ -72,7 +72,7 @@ interface Window {
 		 */
 		createAlbum(albumName: string, maxRating: number): Promise<string>;
 		/**
-		 * Deletes given album from database (it won't delete photos files)
+		 * Deletes given album from database **(it won't delete photos files)**
 		 */
 		deleteAlbum(albumId: string): Promise<boolean>;
 
@@ -88,22 +88,28 @@ interface Window {
 		getAlbum(albumId: string): Promise<album>;
 
 		/**
-		 * Opens window allowing user to select photos with .png, .jpg and .jpeg extensions
+		 * Opens window allowing user to select photos with **.png**, **.jpg** and **.jpeg** extensions *(case insensitive)*
 		 * @returns absolute paths to selected photos
 		 */
 		selectImagesDialog(): Promise<string[]>;
 
 		/**
-		 * Inserts readable images with given paths to the database
+		 * Inserts **readable** images with given paths to the database
 		 *
-		 * In case if any photo is unreadable, alert() is displayed with message containing number of unreadable images
+		 * In case if any photo is unreadable, alert() is displayed with message containing number of unreadable images. (**All other readable images are insterted normaly**)
 		 *
-		 * @param imagesPaths Absolute paths of images to insert
+		 * @param imagesPaths **Absolute** paths of images to insert
 		 * @returns objects of succesfully inserted photos
 		 */
 		insertImages(
 			albumId: string,
 			imagesPaths: string[],
 		): Promise<Omit<photo, "fileName">[]>;
+
+		/**
+		 * Updates photos rating and last_display in given album inside database.
+		 * @returns **true** on succes, **false** on error
+		 */
+		updatePhotosRating(albumId: string, photos: photo[]): Promise<boolean>;
 	};
 }

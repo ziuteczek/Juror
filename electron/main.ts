@@ -15,6 +15,7 @@ import {
 	dbGetAlbumsDataList,
 	db,
 	dbInsertPhotos,
+	dbUpdatePhotosRating,
 } from "./db/db";
 import { devMode } from "../src/env";
 
@@ -209,6 +210,14 @@ ipcMain.handle(
 		}
 
 		return dbInsertPhotos(albumId, existingImages);
+	},
+);
+
+ipcMain.handle(
+	"update-photos-rating",
+	(_, albumId: string, photos: photo[]) => {
+		const { success } = dbUpdatePhotosRating(albumId, photos);
+		return success;
 	},
 );
 

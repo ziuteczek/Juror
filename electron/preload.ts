@@ -47,4 +47,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	insertImages(albumId: string, imagesPaths: string[]) {
 		return ipcRenderer.invoke("insert-images", albumId, imagesPaths);
 	},
+	updatePhotosRating(albumId: string, photos: photo[]) {
+		return ipcRenderer.invoke("update-photos-rating", albumId, photos);
+	},
 });
