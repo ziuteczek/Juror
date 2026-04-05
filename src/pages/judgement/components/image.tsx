@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-import type {  currPhotoData } from "../types";
+import type { currPhotoData } from "../types";
 
 export default function JudgementImage({
 	currPhoto,
@@ -16,10 +16,18 @@ export default function JudgementImage({
 			return;
 		}
 
-		photoToBase64(albumData[currPhoto.index].path).then((img) =>
-			setCurrPhoto((old) => ({ ...old, photoBase64: img })),
-		);
+		window.ipcRenderer
+			.photoToBase64(albumData[currPhoto.index].filePath)
+			.then((img) =>
+				setCurrPhoto((old) => ({ ...old, photoBase64: img })),
+			);
 	}, [albumData, currPhoto.index, setCurrPhoto]);
 
-	return <img src={currPhoto.photoBase64} alt={"Photo to judge"} className="object-contain max-h-svh max-w-[90svw]" />;
+	return (
+		<img
+			src={currPhoto.photoBase64}
+			alt={"Photo to judge"}
+			className="object-contain max-h-svh max-w-[90svw]"
+		/>
+	);
 }

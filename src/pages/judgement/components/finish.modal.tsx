@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
-import { photoData } from "../types";
 import flowers from "../../../assets/flowers.svg";
-import exportAlbumData from "../utils/export";
-export default function FinishModal({ albumData }: { albumData: photoData[] }) {
+export default function FinishModal({ albumData }: { albumData: photo[] }) {
 	const end = albumData.every((photo) => !!photo.rating);
 
 	if (!end) {
@@ -32,7 +30,7 @@ export default function FinishModal({ albumData }: { albumData: photoData[] }) {
 				</Link>
 				<button
 					className="block bg-green-500 w-full py-2 text-center cursor-pointer"
-					onClick={() => exportAlbumData(albumData)}
+					// onClick={() => exportAlbumData(albumData)}
 				>
 					Export resoults
 				</button>

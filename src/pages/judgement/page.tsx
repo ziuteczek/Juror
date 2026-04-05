@@ -86,10 +86,6 @@ export default function Judgement() {
 		}
 	}, [albumData, currPhoto.index]);
 
-	if (devMode) {
-		console.log(albumData);
-	}
-
 	if (!albumTitle) {
 		naviate("/");
 		return <></>;
@@ -120,7 +116,7 @@ export default function Judgement() {
 					setAlbumData={setAlbumData}
 					setCurrPhoto={setCurrPhoto}
 				/>
-				<ExitJudgement albumPath={albumTitle} albumData={albumData} />
+				<ExitJudgement albumPath={albumTitle} />
 				{/* <img src={settingsIcon} alt="" /> */}
 			</div>
 			<FinishModal albumData={albumData} />

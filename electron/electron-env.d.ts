@@ -101,6 +101,9 @@ interface Window {
 		 * @param imagesPaths Absolute paths of images to insert
 		 * @returns objects of succesfully inserted photos
 		 */
-		insertImages(albumId: string, imagesPaths: string[]);
+		insertImages(
+			albumId: string,
+			imagesPaths: string[],
+		): Promise<Omit<photo, "fileName">[]>;
 	};
 }
