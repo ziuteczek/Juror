@@ -133,10 +133,11 @@ export default function Album() {
 					/>
 				</button>
 
-				{photos.map(({ filePath, rating }) => (
+				{photos.map(({ filePath, rating, fileName }) => (
 					<PhotoThumbnail
 						path={filePath}
 						maxRating={albumData?.maxRating}
+						fileName={fileName}
 						// albumId={albumId}
 						rating={rating}
 					/>

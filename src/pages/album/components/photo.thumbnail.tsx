@@ -5,11 +5,13 @@ import { Link } from "react-router-dom";
 export default function PhotoThumbnail({
 	path,
 	rating,
+	fileName,
 	// albumId,
 	maxRating,
 }: {
 	path: string;
 	rating: number | null;
+	fileName: string;
 	// albumId: string;
 	maxRating: number;
 }) {
@@ -36,12 +38,9 @@ export default function PhotoThumbnail({
 	}, [path, inView]);
 
 	return (
-		<Link to={"/"} ref={ref} key={path}>
-			<h3>{path}</h3>
-			<img
-				src={photoBase64}
-				className="max-w-50 max-h-50 size-full object-cover"
-			/>
+		<Link to={"/"} ref={ref} key={path} className="max-w-50 max-h-50">
+			<h3 className="truncate">{fileName}</h3>
+			<img src={photoBase64} className="size-full object-cover" />
 			<p>
 				{rating ?? 0}/{maxRating}
 			</p>

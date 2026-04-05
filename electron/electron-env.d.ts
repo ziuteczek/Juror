@@ -13,6 +13,7 @@ type returnWrapper<T> ={
 
 interface photo {
 	filePath: string;
+	fileName: string;
 	rating: number | null;
 	lastTimeDisplayed: Date | null;
 }
@@ -94,9 +95,9 @@ interface Window {
 
 		/**
 		 * Inserts readable images with given paths to the database
-		 * 
+		 *
 		 * In case if any photo is unreadable, alert() is displayed with message containing number of unreadable images
-		 * 
+		 *
 		 * @param imagesPaths Absolute paths of images to insert
 		 * @returns objects of succesfully inserted photos
 		 */

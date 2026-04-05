@@ -9,6 +9,7 @@ import getPhotosQuery from "./sql/get.photos.sql?raw";
 import Database from "better-sqlite3";
 import { dbFileName, devMode } from "../../src/env";
 import { randomUUID } from "node:crypto";
+import path from "node:path";
 
 /**
  * Initialized database
@@ -77,7 +78,15 @@ const dbGetAlbum = (albumId: string): returnWrapper<album> => {
 		const albumData = queries.getAlbumData.get({
 			id: albumId,
 		}) as albumData;
-		const photos = queries.getPhotos.all({ album_id: albumId }) as photo[];
+
+		const photosNoFileName = queries.getPhotos.all({
+			album_id: albumId,
+		}) as Omit<photo, "fileName">[];
+
+		const photos = photosNoFileName.map((photo) => ({
+			...photo,
+			fileName: path.basename(photo.filePath),
+		}));
 
 		const album = {
 			...albumData,
