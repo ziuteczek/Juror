@@ -1,7 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import xIcon from "../../../assets/x.icon.svg";
-import createteNewAlbum from "../utils/create.new.album";
-import openAlbumDirectory from "../utils/open.album.directory";
 
 export default function CreateAlbumModal({
 	isVisible,
@@ -11,13 +9,26 @@ export default function CreateAlbumModal({
 	setIsVisible: Dispatch<SetStateAction<boolean>>;
 }) {
 	const [albumTitle, setAlbumTitle] = useState("");
+	const [maxRating, setMaxRating] = useState(6);
 	const dialogRef = useRef<null | HTMLDialogElement>(null);
 
+	const closeDialog = () => {
+		setIsVisible(false);
+	};
+
 	useEffect(() => {
-		if (isVisible) {
-			dialogRef.current?.showModal();
-		} else {
-			dialogRef.current?.close();
+		const dialog = dialogRef.current;
+
+		if (!dialog) {
+			return;
+		}
+
+		if (isVisible && !dialog.open) {
+			dialog.showModal();
+		}
+
+		if (!isVisible && dialog.open) {
+			dialog.close();
 		}
 	}, [isVisible]);
 
@@ -29,10 +40,13 @@ export default function CreateAlbumModal({
 			return;
 		}
 
-		const newAlbumPath = await createteNewAlbum(albumTitle);
+		const newAlbumPath = await window.ipcRenderer.createAlbum(
+			albumTitle.trim(),
+			maxRating,
+		);
 
 		setAlbumTitle("");
-		setIsVisible(false);
+		closeDialog();
 
 		if (!newAlbumPath) {
 			alert("Failed to create album");
@@ -41,40 +55,55 @@ export default function CreateAlbumModal({
 
 		alert("Album created successfully");
 
-		const successDirOpen = await openAlbumDirectory(newAlbumPath);
-		if (!successDirOpen) {
-			alert("Failed to open album directory");
-		}
 		window.location.reload();
 	};
 
 	return (
 		<dialog
 			ref={dialogRef}
-			className="relative left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]"
+			onClose={closeDialog}
+			onCancel={closeDialog}
+			className="relative left-[50%] top-[50%] min-w-96 translate-x-[-50%] translate-y-[-50%] p-10 pt-14"
 		>
 			{/* exit btn */}
 			<button
-				onClick={() => setIsVisible(false)}
-				className="max-w-20 max-h-20 size-full cursor-pointer absolute top-0 left-0"
+				type="button"
+				onClick={closeDialog}
+				className="absolute left-3 top-3 flex h-8 w-8 cursor-pointer items-center justify-center"
 			>
-				<img src={xIcon} alt="exit icon" />
+				<img src={xIcon} alt="exit icon" className="h-full w-full" />
 			</button>
 
-			<form className="flex flex-col my-40 mx-25" onSubmit={createAlbum}>
+			<form className="flex flex-col gap-2" onSubmit={createAlbum}>
 				<h1 className="font-bold text-2xl">Create new album</h1>
 
-				<label htmlFor="title" className="block mt-3 text-xl">
+				<label htmlFor="title" className="mt-3 text-xl">
 					album title
 				</label>
 				<input
 					type="text"
 					name="title"
 					id="title"
-					className="border block"
+					autoFocus
+					className="block w-full border px-2 py-1"
 					value={albumTitle}
 					onChange={(e) => setAlbumTitle(e.target.value)}
 				/>
+
+				<label htmlFor="max-rating">max rating</label>
+				<div className="flex">
+					<input
+						type="range"
+						id="max-rating"
+						min={2}
+						max={10}
+						name="max-rating"
+						value={maxRating}
+						className="flex-1"
+						onChange={(e) => setMaxRating(Number(e.target.value))}
+					/>
+					<span className="text-2xl font-bold">{maxRating}</span>
+				</div>
 				<button
 					type="submit"
 					className="bg-blue-500 text-white mt-3 text-2xl cursor-pointer"

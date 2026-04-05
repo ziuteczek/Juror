@@ -1,5 +1,4 @@
 import { ipcRenderer, contextBridge } from "electron";
-import { photoData } from "../src/pages/judgement/types";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", {
@@ -21,34 +20,37 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 		const [channel, ...omit] = args;
 		return ipcRenderer.invoke(channel, ...omit);
 	},
-	getOfflineGalleryData() {
-		return ipcRenderer.invoke("get-offline-gallery-data");
+
+	// Non build in stuff :D
+
+	async photoToBase64(photoPath: string) {
+		return await ipcRenderer.invoke("photo-to-base-64", photoPath);
 	},
-	getOfflineAlbumPhotosList(albumPath: string) {
-		return ipcRenderer.invoke("get-offline-album-photos-list", albumPath);
+	createAlbum(albumName: string, maxRating: number) {
+		return ipcRenderer.invoke("create-album", albumName, maxRating);
 	},
-	getAlbumData(albumPath: string) {
-		return ipcRenderer.invoke("get-album-data", albumPath);
+	deleteAlbum(albumId: string) {
+		return ipcRenderer.invoke("delete-album", albumId);
 	},
-	photoToBase64(photoPath: string) {
-		return ipcRenderer.invoke("photo-to-base-64", photoPath);
+	getAlbumsData() {
+		return ipcRenderer.invoke("get-albums-data-list");
 	},
-	saveAlbumData(albumPath: string, albumData: photoData[]) {
-		return ipcRenderer.invoke("save-album-data", albumPath, albumData);
+	getAlbumThumbnailBase64(albumId: string) {
+		return ipcRenderer.invoke("get-album-base-64-thumbnail", albumId);
 	},
-	resetAlbumData(albumPath: string) {
-		return ipcRenderer.invoke("reset-album-data", albumPath);
+	getAlbum(albumId: string) {
+		return ipcRenderer.invoke("get-album", albumId);
 	},
-	exportAlbumData(albumData: photoData[]) {
-		return ipcRenderer.invoke("export-album-data", albumData);
+	selectImagesDialog() {
+		return ipcRenderer.invoke("select-images");
 	},
-	createAlbum(albumName: string) {
-		return ipcRenderer.invoke("create-album", albumName);
+	insertImages(albumId: string, imagesPaths: string[]) {
+		return ipcRenderer.invoke("insert-images", albumId, imagesPaths);
 	},
-	openAlbumDirectory(albumName: string) {
-		return ipcRenderer.invoke("open-album-directory", albumName);
+	updatePhotosRating(albumId: string, photos: photo[]) {
+		return ipcRenderer.invoke("update-photos-rating", albumId, photos);
 	},
-	async deleteAlbum(albumPath: string): Promise<string> {
-		return ipcRenderer.invoke("delete-album", albumPath);
+	resetAlbumPhotosRating(albumId: string) {
+		return ipcRenderer.invoke("reset-album-photos-rating", albumId);
 	},
 });

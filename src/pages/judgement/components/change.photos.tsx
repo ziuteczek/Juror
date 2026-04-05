@@ -1,15 +1,15 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-import { photoData, currPhotoData } from "../types";
+import { currPhotoData } from "../types";
 
 export default function ChangePhotos({
 	currPhoto,
 	albumData,
-	setAlbumData,
+	setPhotos,
 	setCurrPhoto,
 }: {
 	currPhoto: currPhotoData;
-	albumData: photoData[];
-	setAlbumData: Dispatch<SetStateAction<photoData[]>>;
+	albumData: photo[];
+	setPhotos: Dispatch<SetStateAction<photo[]>>;
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
 	// const [nextPhotoPossible, setNextPhotoPossible] = useState(false);
@@ -19,39 +19,38 @@ export default function ChangePhotos({
 		if (
 			albumData.find(
 				(photo) =>
-					(photo.lastTimeDisplayed?.getTime() ?? 0) >
-					(albumData[currPhoto.index].lastTimeDisplayed?.getTime() ??
+					(photo.lastDisplayed?.getTime() ?? 0) >
+					(albumData[currPhoto.index].lastDisplayed?.getTime() ??
 						Infinity),
 			)
 		) {
 			const photosDisplayedBeforeCurrPhoto = albumData
 				.filter(
 					(photo) =>
-						(photo.lastTimeDisplayed?.getTime() ?? 0) >
+						(photo.lastDisplayed?.getTime() ?? 0) >
 						(albumData[
 							currPhoto.index
-						].lastTimeDisplayed?.getTime() as number),
+						].lastDisplayed?.getTime() as number),
 				)
-				.map((photo) => photo.lastTimeDisplayed?.getTime() as number);
-			const nextPhotoLastTimeDisplayed = Math.min(
+				.map((photo) => photo.lastDisplayed?.getTime() as number);
+			const nextPhotolastDisplayed = Math.min(
 				...photosDisplayedBeforeCurrPhoto,
 			);
-			if (!isFinite(nextPhotoLastTimeDisplayed)) {
+			if (!isFinite(nextPhotolastDisplayed)) {
 				return;
 			}
 			const nextPhotoIndex = albumData.findIndex(
 				(photo) =>
-					photo.lastTimeDisplayed?.getTime() ===
-					nextPhotoLastTimeDisplayed,
+					photo.lastDisplayed?.getTime() === nextPhotolastDisplayed,
 			) as number;
 			setCurrPhoto({ index: nextPhotoIndex, photoBase64: "" });
 			return;
 		}
 
-		setAlbumData((prev) =>
+		setPhotos((prev) =>
 			prev.map((photo, index) =>
 				index === currPhoto.index
-					? { ...photo, lastTimeDisplayed: new Date() }
+					? { ...photo, lastDisplayed: new Date() }
 					: { ...photo },
 			),
 		);
@@ -61,24 +60,23 @@ export default function ChangePhotos({
 
 	const prevPhoto = () => {
 		const currentPhotoTime =
-			albumData[currPhoto.index]?.lastTimeDisplayed?.getTime();
+			albumData[currPhoto.index]?.lastDisplayed?.getTime();
 
-		const photosLastTimeDisplayed = albumData
+		const photoslastDisplayed = albumData
 			.filter(
 				(photo) =>
-					(photo.lastTimeDisplayed?.getTime() ?? Infinity) <
+					(photo.lastDisplayed?.getTime() ?? Infinity) <
 					(currentPhotoTime ?? Infinity),
 			)
-			.map((photo) => photo.lastTimeDisplayed?.getTime()) as number[];
+			.map((photo) => photo.lastDisplayed?.getTime()) as number[];
 
-		const prevPhotoLastTimeDisplayed = Math.max(...photosLastTimeDisplayed);
-		if (!Number.isFinite(prevPhotoLastTimeDisplayed)) {
+		const prevPhotolastDisplayed = Math.max(...photoslastDisplayed);
+		if (!Number.isFinite(prevPhotolastDisplayed)) {
 			return;
 		}
 		const prevPhotoIndex = albumData.findIndex(
 			(photo) =>
-				photo.lastTimeDisplayed?.getTime() ===
-				prevPhotoLastTimeDisplayed,
+				photo.lastDisplayed?.getTime() === prevPhotolastDisplayed,
 		) as number;
 
 		setCurrPhoto({ index: prevPhotoIndex, photoBase64: "" });
@@ -87,17 +85,17 @@ export default function ChangePhotos({
 	useEffect(() => {
 		// const isPrevPhotoPossible = albumData.some(
 		// 	(photo) =>
-		// 		photo.lastTimeDisplayed &&
-		// 		photo.lastTimeDisplayed.getTime() <
-		// 			(albumData[currPhoto.index].lastTimeDisplayed?.getTime() ??
+		// 		photo.lastDisplayed &&
+		// 		photo.lastDisplayed.getTime() <
+		// 			(albumData[currPhoto.index].lastDisplayed?.getTime() ??
 		// 				0),
 		// );
 		// const isNextPhotoPossible = albumData.some(
 		// 	(photo) =>
 		// 		photo.rating &&
-		// 		photo.lastTimeDisplayed &&
-		// 		photo.lastTimeDisplayed.getTime() >
-		// 			(albumData[currPhoto.index].lastTimeDisplayed?.getTime() ??
+		// 		photo.lastDisplayed &&
+		// 		photo.lastDisplayed.getTime() >
+		// 			(albumData[currPhoto.index].lastDisplayed?.getTime() ??
 		// 				0),
 		// );
 		// setPrevPhotoPossible(isPrevPhotoPossible);

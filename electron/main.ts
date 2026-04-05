@@ -1,27 +1,30 @@
 import "dotenv/config";
-import {
-	app,
-	BrowserWindow,
-	dialog,
-	ipcMain,
-	IpcMainInvokeEvent,
-	shell,
-} from "electron";
+
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import path, { extname } from "node:path";
-import { readdir, mkdir, readFile } from "fs/promises";
+import path from "node:path";
+import { readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
-import ElectronStore from "electron-store";
-import { photoData } from "../src/pages/judgement/types";
-import { offlineGalleryDirName } from "../src/env";
-import { writeFile } from "node:fs/promises";
-import * as XLSX from "xlsx";
+import {
+	dbCreateAlbum,
+	dbDeleteAlbum,
+	dbGetAlbum,
+	dbGetAlbumData,
+	dbGetThumbnailPath,
+	dbGetAlbumsDataList,
+	db,
+	dbInsertPhotos,
+	dbUpdatePhotosRating,
+	dbResetAlbumsPhotosRatings,
+} from "./db/db";
+import { devMode } from "../src/env";
 
 const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // electron-router-dom expects CommonJS-style `require` in the main process.
 globalThis.require = require;
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // The built directory structure
 //
@@ -81,6 +84,7 @@ function createWindow() {
 app.on("window-all-closed", () => {
 	if (process.platform !== "darwin") {
 		app.quit();
+		db.close();
 		win = null;
 	}
 });
@@ -93,45 +97,32 @@ app.on("activate", () => {
 	}
 });
 
-async function dirExists(dirPath: string): Promise<boolean> {
+const isFile = async (path: string) => {
 	try {
-		await readdir(dirPath);
+		await readFile(path);
 		return true;
-	} catch {
+	} catch (err) {
+		if (devMode) {
+			console.error(err);
+		}
 		return false;
 	}
-}
+};
 
-async function getThumbnail(dirPath: string): Promise<string> {
+/**
+ * Transforms image from given path to base 64 string
+ * @param photoPath PNG or JPEG photo image
+ * @returns base64 string or empty string on error
+ */
+async function imagePathToBase64(photoPath: string): Promise<string> {
 	try {
-		const files = await readdir(dirPath);
-		const photos = [
-			...files.filter(
-				(file) =>
-					file.toLocaleLowerCase().endsWith(".jpg") ||
-					file.toLocaleLowerCase().endsWith(".jpeg"),
-			),
-		].sort();
+		const isPng = photoPath.toLocaleLowerCase().endsWith(".png");
 
-		if (photos.length === 0) {
-			return "";
-		}
-
-		const thumbnailPath = path.join(dirPath, photos[0]);
-		return photoToBase64(thumbnailPath);
-	} catch (err) {
-		console.error(err);
-		return "";
-	}
-}
-
-async function photoToBase64(photoPath: string): Promise<string> {
-	try {
 		const photoBase64 = await readFile(photoPath, {
 			encoding: "base64",
 		});
 
-		return `data:image/jpeg;base64,${photoBase64}`;
+		return `data:image/${isPng ? "png" : "jpeg"};base64,${photoBase64}`;
 	} catch (err) {
 		console.error(err);
 		return "";
@@ -139,262 +130,101 @@ async function photoToBase64(photoPath: string): Promise<string> {
 }
 
 ipcMain.handle("photo-to-base-64", async (_, photoPath: string) => {
-	return photoToBase64(photoPath);
+	return await imagePathToBase64(photoPath);
 });
 
-// IPC handler for getting offline gallery data
-ipcMain.handle("get-offline-gallery-data", async () => {
-	const picturesPath = app.getPath("pictures");
-	const jurorFolderPath = path.join(picturesPath, offlineGalleryDirName);
+ipcMain.handle("get-album", (_, albumId: string) => {
+	const { data } = dbGetAlbum(albumId);
+	return data;
+});
 
-	if (!(await dirExists(jurorFolderPath))) {
-		await mkdir(jurorFolderPath);
+ipcMain.handle("get-album-data", (_, albumId: string) => {
+	const { data } = dbGetAlbumData(albumId);
+	return data;
+});
+
+ipcMain.handle("create-album", (_, albumName: string, maxRating: number) => {
+	const { success, data } = dbCreateAlbum(albumName, maxRating);
+
+	if (!success) {
+		return "";
 	}
 
-	const directoriesAndFiles = await readdir(jurorFolderPath, {
-		withFileTypes: true,
-	});
-
-	return Promise.all(
-		directoriesAndFiles
-			.filter((dir) => dir.isDirectory())
-			.map(async (dir) => ({
-				name: dir.name,
-				path: path.join(dir.parentPath, dir.name),
-				thumbnail: await getThumbnail(
-					path.join(dir.parentPath, dir.name),
-				),
-			})),
-	);
+	return data;
 });
 
-ipcMain.handle(
-	"get-offline-album-photos-list",
-	//eslint-disable-next-line
-	async (_: any, albumPath: string) => {
-		try {
-			if (!(await dirExists(albumPath))) {
-				console.warn("Album with given path doesn't exists");
-				return [];
-			}
-			return await readdir(albumPath);
-		} catch (err) {
-			console.error(err);
-			return [];
-		}
-	},
-);
-//eslint-disable-next-line
-ipcMain.handle("get-album-data", async (_: any, albumPath: string) => {
-	try {
-		if (!(await dirExists(albumPath))) {
-			console.warn(
-				`Album path with given directory (${albumPath}) doesn't exists`,
-			);
-			return [];
-		}
+ipcMain.handle("delete-album", (_, albumId: string) => {
+	const { success } = dbDeleteAlbum(albumId);
+	return success;
+});
 
-		const storage = new ElectronStore();
-		const albumTitle = path.basename(albumPath);
+ipcMain.handle("get-album-base-64-thumbnail", async (_, albumId: string) => {
+	const { success, data: path } = dbGetThumbnailPath(albumId);
 
-		if (storage.has(albumTitle)) {
-			const albumDataRaw = storage.get(albumTitle) as {
-				title: string;
-				path: string;
-				rating: number | null;
-				lastTimeDisplayed: number | null;
-			}[];
-			return albumDataRaw.map((data) => ({
-				...data,
-				lastTimeDisplayed:
-					data.lastTimeDisplayed != null
-						? new Date(data.lastTimeDisplayed)
-						: null,
-			})) as photoData[];
-		}
+	if (!success) {
+		return "";
+	}
 
-		const albumFiles = await readdir(albumPath, { withFileTypes: true });
-		const albumPhotos = albumFiles.filter(
-			(file) =>
-				(file.isFile() &&
-					file.name.toLocaleLowerCase().endsWith(".jpeg")) ||
-				file.name.toLocaleLowerCase().endsWith(".jpg"),
-		);
-		const albumData = albumPhotos.map((photo) => ({
-			title: photo.name,
-			path: path.join(albumPath, photo.name),
-			rating: null,
-		}));
-		return albumData;
-	} catch (err) {
-		console.error(err);
+	return await imagePathToBase64(path);
+});
+
+ipcMain.handle("get-albums-data-list", () => {
+	const { success, data } = dbGetAlbumsDataList();
+
+	if (!success) {
 		return [];
 	}
+
+	return data;
+});
+
+ipcMain.handle("select-images", async () => {
+	if (!win) {
+		throw new Error("Window is not initialized!");
+	}
+	const resoult = await dialog.showOpenDialog(win, {
+		title: "Select images or directory with images to rate",
+		properties: ["multiSelections", "openFile"],
+		filters: [
+			{
+				name: "Images (jpg, jpeg, png)",
+				extensions: ["png", "jpeg", "jpg"],
+			},
+		],
+	});
+
+	return resoult.filePaths;
 });
 
 ipcMain.handle(
-	"save-album-data",
-	async (
-		_: IpcMainInvokeEvent,
-		albumPath: string,
-		albumData: photoData[],
-	) => {
-		try {
-			if (!(await dirExists(albumPath))) {
-				console.warn(
-					`Album path with given directory (${albumPath}) doesn't exists`,
-				);
-				return false;
-			}
+	"insert-images",
+	async (_, albumId: string, imagesPaths: string[]) => {
+		const existingImages = imagesPaths.filter(
+			async (imagePath) => await isFile(imagePath),
+		);
 
-			const storage = new ElectronStore();
-			const albumTitle = path.basename(albumPath);
-			const albumDataComputed = albumData.map((data) => ({
-				...data,
-				lastTimeDisplayed: data.lastTimeDisplayed?.getTime() ?? null,
-			}));
+		const missingImagesCount =
+			existingImages.length - existingImages.length;
 
-			storage.set(albumTitle, albumDataComputed);
-			return true;
-		} catch (err) {
-			console.error(err);
-			return false;
+		if (missingImagesCount) {
+			alert(`Cound't read ${missingImagesCount} images`);
 		}
-	},
-);
 
-const deleteAlbumData = async (albumPath: string) => {
-	try {
-		const storage = new ElectronStore();
-		const albumTitle = path.basename(albumPath);
-		storage.delete(albumTitle);
-		return true;
-	} catch (err) {
-		console.error(err);
-		return false;
-	}
-};
-
-ipcMain.handle(
-	"reset-album-data",
-	(_: IpcMainInvokeEvent, albumPath: string) => {
-		try {
-			return deleteAlbumData(albumPath);
-		} catch (err) {
-			console.error(err);
-			return false;
-		}
-	},
-);
-
-// ...existing code...
-
-ipcMain.handle(
-	"export-album-data",
-	async (_: IpcMainInvokeEvent, albumData: photoData[]) => {
-		try {
-			const { canceled, filePath } = await dialog.showSaveDialog({
-				title: "Save your file",
-				defaultPath: "output.xlsx",
-				filters: [
-					{ name: "JSON", extensions: ["json"] },
-					{ name: "Excel", extensions: ["xlsx"] },
-				],
-			});
-
-			if (canceled || !filePath) {
-				return false;
-			}
-
-			let outputPath = filePath;
-			let extension = extname(outputPath).toLowerCase();
-
-			if (!extension) {
-				extension = ".xlsx";
-				outputPath = `${outputPath}${extension}`;
-			}
-
-			const exportData = albumData.map((item) => ({
-				...item,
-				lastTimeDisplayed: item.lastTimeDisplayed
-					? item.lastTimeDisplayed.toISOString()
-					: null,
-			}));
-
-			if (extension === ".json") {
-				await writeFile(
-					outputPath,
-					JSON.stringify(exportData, null, 2),
-					"utf-8",
-				);
-				return true;
-			}
-
-			if (extension === ".xlsx") {
-				const worksheet = XLSX.utils.json_to_sheet(exportData);
-				const workbook = XLSX.utils.book_new();
-				XLSX.utils.book_append_sheet(workbook, worksheet, "ratings");
-				XLSX.writeFile(workbook, outputPath);
-				return true;
-			}
-
-			throw new Error(`Unsupported file extension: ${extension}`);
-		} catch (err) {
-			console.error(err);
-			return false;
-		}
+		return dbInsertPhotos(albumId, existingImages);
 	},
 );
 
 ipcMain.handle(
-	"create-album",
-	async (_: IpcMainInvokeEvent, albumName: string) => {
-		try {
-			const picturesPath = app.getPath("pictures");
-			const jurorFolderPath = path.join(
-				picturesPath,
-				offlineGalleryDirName,
-			);
-			const newAlbumPath = path.join(jurorFolderPath, albumName);
-			if (await dirExists(newAlbumPath)) {
-				console.warn("Album with given name already exists");
-				return false;
-			}
-
-			await mkdir(newAlbumPath, { recursive: true });
-			return newAlbumPath;
-		} catch (err) {
-			console.error(err);
-			return "";
-		}
+	"update-photos-rating",
+	(_, albumId: string, photos: photo[]) => {
+		const { success } = dbUpdatePhotosRating(albumId, photos);
+		return success;
 	},
 );
 
-ipcMain.handle(
-	"open-album-directory",
-	async (_: IpcMainInvokeEvent, albumPath: string) => {
-		try {
-			await shell.openPath(albumPath);
-			return true;
-		} catch (err) {
-			console.error(err);
-			return false;
-		}
-	},
-);
-
-ipcMain.handle(
-	"delete-album",
-	async (_: IpcMainInvokeEvent, albumPath: string) => {
-		try {
-			deleteAlbumData(albumPath);
-			await shell.trashItem(albumPath);
-			return true;
-		} catch (err) {
-			console.error(err);
-			return false;
-		}
-	},
-);
+ipcMain.handle("reset-album-photos-rating", (_, albumId: string) => {
+	const { success } = dbResetAlbumsPhotosRatings(albumId);
+	return success;
+});
 
 app.whenReady().then(createWindow);

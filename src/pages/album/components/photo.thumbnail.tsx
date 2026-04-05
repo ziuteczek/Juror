@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import photoToBase64 from "../../judgement/utils/photo.to.base64";
 import { Link } from "react-router-dom";
-import { maxRating } from "../../../env";
 
 export default function PhotoThumbnail({
-	name,
 	path,
 	rating,
-	rootPath,
+	fileName,
+	// albumId,
+	maxRating,
 }: {
-	name: string;
 	path: string;
 	rating: number | null;
-	rootPath: string;
+	fileName: string;
+	// albumId: string;
+	maxRating: number;
 }) {
 	const { ref, inView } = useInView();
 	const [photoBase64, setPhotoBase64] = useState("");
@@ -22,9 +22,10 @@ export default function PhotoThumbnail({
 		(async () => {
 			if (!inView) {
 				setPhotoBase64("");
+				return;
 			}
 
-			const photoStr = await photoToBase64(path);
+			const photoStr = await window.ipcRenderer.photoToBase64(path);
 
 			if (!photoStr) {
 				console.error(`Photo with path "${path}" not found`);
@@ -35,12 +36,10 @@ export default function PhotoThumbnail({
 		})();
 	}, [path, inView]);
 
-	console.log(rootPath);
-
 	return (
-		<Link to={"/"} ref={ref} key={name}>
-			<h3>{name}</h3>
-			<img src={photoBase64} className="max-w-50 max-h-50 size-full object-cover" />
+		<Link to={"/"} ref={ref} key={path} className="max-w-50 max-h-50">
+			<h3 className="truncate">{fileName}</h3>
+			<img src={photoBase64} className="size-full object-cover" />
 			<p>
 				{rating ?? 0}/{maxRating}
 			</p>

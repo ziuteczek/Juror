@@ -1,25 +1,18 @@
 import { useEffect, useState } from "react";
-import getOfflineGalleryData from "./utils/get.offline.gallery.data";
-import { devMode } from "../../env";
 import AlbumThumbnail from "./components/album.thumbnail";
 import plusIcon from "../../assets/plus.icon.svg";
 import CreateAlbumModal from "./components/create.album.modal";
-
-type GalleryOflineData = Awaited<ReturnType<typeof getOfflineGalleryData>>;
 
 /**
  * Displays albums and allows creating new ones.
  */
 export default function Gallery() {
-	const [galleries, setGalleries] = useState<GalleryOflineData>([]);
+	const [galleries, setGalleries] = useState<albumData[]>([]);
 	const [createAlbumVisible, setCreateAlbumVisible] = useState(false);
 
 	useEffect(() => {
 		(async () => {
-			const galleriesData = await getOfflineGalleryData();
-			if (devMode) {
-				console.log(galleriesData);
-			}
+			const galleriesData = await window.ipcRenderer.getAlbumsData();
 			setGalleries(galleriesData);
 		})();
 	}, []);
@@ -38,13 +31,8 @@ export default function Gallery() {
 						className="bg-green-400 size-full"
 					/>
 				</button>
-				{galleries.map(({ name, thumbnail, path }) => (
-					<AlbumThumbnail
-						name={name}
-						thumbnail={thumbnail}
-						path={path}
-						key={name}
-					/>
+				{galleries.toSorted().map(({ id, name }) => (
+					<AlbumThumbnail id={id} name={name} />
 				))}
 			</div>
 			<CreateAlbumModal

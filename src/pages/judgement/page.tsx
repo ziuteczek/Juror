@@ -1,23 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import type { photoData, currPhotoData } from "./types";
-import getAlbumData from "./utils/get.album.data";
-
 import FinishModal from "./components/finish.modal";
 import JudgementImage from "./components/image";
-import { devMode } from "../../env";
 import SelectRating from "./components/select.rating";
 import ChangePhotos from "./components/change.photos";
 import ExitJudgement from "./components/exit";
+import { currPhotoData } from "./types";
 
 /**
  * It's judging album given in search params under the key "album".
  */
 export default function Judgement() {
-	const [albumData, setAlbumData] = useState<photoData[]>([]);
+	const [photos, setPhotos] = useState<photo[]>([]);
+	const [maxRating, setMaxRating] = useState(0);
 	const [searchParams] = useSearchParams();
-	const albumTitle = searchParams.get("album");
+	const albumId = searchParams.get("album");
 	const naviate = useNavigate();
 
 	const [currPhoto, setCurrPhoto] = useState<currPhotoData>({
@@ -27,43 +25,39 @@ export default function Judgement() {
 
 	//Initial album load
 	useEffect(() => {
-		if (!albumTitle) {
+		if (!albumId) {
 			return;
 		}
 
 		(async () => {
-			const data = await getAlbumData(albumTitle);
-			setAlbumData(data);
+			const data = await window.ipcRenderer.getAlbum(albumId);
+			setPhotos(data.photos);
+			setMaxRating(data.maxRating);
 		})();
-	}, [albumTitle]);
+	}, [albumId]);
 
 	// If photo is not chosen, it selects next one
 	useEffect(() => {
-		if (currPhoto.index >= 0 || albumData.length === 0) {
+		if (currPhoto.index >= 0 || photos.length === 0) {
 			return;
 		}
 
-		const unratedPhotoIndex = albumData.findIndex((photo) => !photo.rating);
+		const unratedPhotoIndex = photos.findIndex((photo) => !photo.rating);
 
 		const earliestSkippedPhotoDateEpoch = Math.min(
-			...albumData
+			...photos
 				.filter((photo) => !photo.rating)
-				.map((photo) => photo.lastTimeDisplayed?.getTime())
+				.map((photo) => photo.lastDisplayed?.getTime())
 				.filter((time): time is number => time !== undefined),
 		);
 
-		const earliestSkippedPhotoIndex = albumData
-			.filter((photo) => photo.lastTimeDisplayed)
+		const earliestSkippedPhotoIndex = photos
+			.filter((photo) => photo.lastDisplayed)
 			.findIndex(
 				(photo) =>
-					photo.lastTimeDisplayed?.getTime() ===
+					photo.lastDisplayed?.getTime() ===
 					earliestSkippedPhotoDateEpoch,
 			);
-
-		if (devMode) {
-			console.log(unratedPhotoIndex);
-			console.log(earliestSkippedPhotoIndex);
-		}
 
 		if (unratedPhotoIndex !== -1) {
 			setCurrPhoto({
@@ -80,22 +74,14 @@ export default function Judgement() {
 			});
 			return;
 		}
+	}, [photos, currPhoto.index]);
 
-		if (devMode) {
-			console.log("They are no more photos left to rate");
-		}
-	}, [albumData, currPhoto.index]);
-
-	if (devMode) {
-		console.log(albumData);
-	}
-
-	if (!albumTitle) {
+	if (!albumId) {
 		naviate("/");
 		return <></>;
 	}
 
-	if (!albumData[currPhoto.index]) {
+	if (!photos[currPhoto.index]) {
 		return <div>Loading...</div>;
 	}
 
@@ -104,25 +90,25 @@ export default function Judgement() {
 			<JudgementImage
 				setCurrPhoto={setCurrPhoto}
 				currPhoto={currPhoto}
-				albumData={albumData}
+				albumData={photos}
 			/>
 
 			<div className="flex-1 flex flex-col p-2 justify-center items-center">
 				<SelectRating
-					albumData={albumData}
+					photos={photos}
+					setPhoto={setPhotos}
 					currPhoto={currPhoto}
-					setAlbumData={setAlbumData}
+					maxRating={maxRating}
 				/>
 				<ChangePhotos
-					albumData={albumData}
+					albumData={photos}
 					currPhoto={currPhoto}
-					setAlbumData={setAlbumData}
+					setPhotos={setPhotos}
 					setCurrPhoto={setCurrPhoto}
 				/>
-				<ExitJudgement albumPath={albumTitle} albumData={albumData} />
-				{/* <img src={settingsIcon} alt="" /> */}
+				<ExitJudgement albumId={albumId} photos={photos} />
 			</div>
-			<FinishModal albumData={albumData} />
+			<FinishModal photos={photos} albumId={albumId} />
 		</div>
 	);
 }

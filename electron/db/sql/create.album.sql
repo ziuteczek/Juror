@@ -1,0 +1,1 @@
+INSERT INTO albums (id,name,max_rating) VALUES ($id,$album_name,$max_rating);
