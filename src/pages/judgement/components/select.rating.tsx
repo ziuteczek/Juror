@@ -58,7 +58,6 @@ export default function SelectRating({
 		<form className="flex flex-col gap-5 items-center">
 			{Array.from({ length: maxRating }, (_, i) => {
 				const isSelected = photos[currPhoto.index].rating === i + 1;
-
 				return (
 					<Fragment key={i}>
 						<label
