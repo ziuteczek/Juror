@@ -124,7 +124,7 @@ const dbGetThumbnailPath = (albumId: string): returnWrapper<string> => {
 		}) as {
 			filePath: string;
 		};
-
+		console.log(row);
 		return { success: true, data: row.filePath, error: null };
 	} catch (err) {
 		if (devMode) {

@@ -32,9 +32,9 @@ export default function Album() {
 
 		(async () => {
 			const data = await window.ipcRenderer.getAlbum(albumId);
+			console.log("data", data);
 			setPhotos(data.photos);
-			console.log(data);
-			console.log("data.photos", data.photos);
+
 			const { photos, ...albumData } = data;
 			setAlbumData(albumData);
 		})();
@@ -71,6 +71,8 @@ export default function Album() {
 		navigate("/");
 	};
 
+	console.log(photos);
+
 	return (
 		<>
 			<Link to="/" className="pl-3 block">
@@ -90,7 +92,7 @@ export default function Album() {
 					<span className="text-4xl uppercase text-white">start</span>
 				</Link>
 
-				{/* open directory */}
+				{/*Select photos*/}
 				<button
 					onClick={async () => {
 						const imagesPaths =
@@ -99,6 +101,7 @@ export default function Album() {
 							albumId,
 							imagesPaths,
 						);
+						window.location.reload();
 					}}
 					className="flex items-center justify-center w-50 h-50 bg-yellow-600 mt-6 flex-col cursor-pointer"
 				>
@@ -130,9 +133,9 @@ export default function Album() {
 					/>
 				</button>
 
-				{photos.map(({ path, rating }) => (
+				{photos.map(({ filePath, rating }) => (
 					<PhotoThumbnail
-						path={path}
+						path={filePath}
 						maxRating={albumData?.maxRating}
 						// albumId={albumId}
 						rating={rating}

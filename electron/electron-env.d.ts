@@ -12,7 +12,7 @@ type returnWrapper<T> ={
 };
 
 interface photo {
-	path: string;
+	filePath: string;
 	rating: number | null;
 	lastTimeDisplayed: Date | null;
 }

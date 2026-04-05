@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import photoToBase64 from "../../judgement/utils/photo.to.base64";
 import { Link } from "react-router-dom";
 
 export default function PhotoThumbnail({
@@ -17,13 +16,15 @@ export default function PhotoThumbnail({
 	const { ref, inView } = useInView();
 	const [photoBase64, setPhotoBase64] = useState("");
 
+	console.log("path", path);
 	useEffect(() => {
 		(async () => {
 			if (!inView) {
 				setPhotoBase64("");
+				return;
 			}
 
-			const photoStr = await photoToBase64(path);
+			const photoStr = await window.ipcRenderer.photoToBase64(path);
 
 			if (!photoStr) {
 				console.error(`Photo with path "${path}" not found`);
@@ -33,7 +34,6 @@ export default function PhotoThumbnail({
 			setPhotoBase64(photoStr);
 		})();
 	}, [path, inView]);
-
 
 	return (
 		<Link to={"/"} ref={ref} key={path}>

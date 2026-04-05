@@ -23,8 +23,8 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 
 	// Non build in stuff :D
 
-	photoToBase64(photoPath: string) {
-		return ipcRenderer.invoke("photo-to-base-64", photoPath);
+	async photoToBase64(photoPath: string) {
+		return await ipcRenderer.invoke("photo-to-base-64", photoPath);
 	},
 	createAlbum(albumName: string, maxRating: number) {
 		return ipcRenderer.invoke("create-album", albumName, maxRating);
