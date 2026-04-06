@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import flowers from "../../../assets/flowers.svg";
-import { useEffect } from "react";
+import { DialogHTMLAttributes, useEffect, useRef } from "react";
 export default function FinishModal({
 	albumId,
 	photos,
@@ -9,20 +9,22 @@ export default function FinishModal({
 	photos: photo[];
 }) {
 	const end = photos.every((photo) => !!photo.rating);
+	const dialogRef = useRef<HTMLDialogElement | null>(null);
 
 	useEffect(() => {
+		const dialogEl = dialogRef.current;
+
 		if (end) {
 			window.ipcRenderer.updatePhotosRating(albumId, photos);
+			dialogEl?.showModal();
+		} else {
+			dialogEl?.close();
 		}
-	}, [end]);
-
-	if (!end) {
-		return <></>;
-	}
+	}, [end, albumId, photos]);
 
 	return (
 		<dialog
-			open={true}
+			ref={dialogRef}
 			className="left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] pb-25 px-50 border"
 		>
 			<h1 className="pt-15 text-center text-5xl">You finished!</h1>
