@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import flowers from "../../../assets/flowers.svg";
-import { DialogHTMLAttributes, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 export default function FinishModal({
 	albumId,
 	photos,
