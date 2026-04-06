@@ -5,6 +5,12 @@ import PhotoThumbnail from "./components/photo.thumbnail";
 import trashIcon from "../../assets/trash.icon.svg";
 import resetIcon from "../../assets/reset.icon.svg";
 import directoryIcon from "../../assets/directory.icon.svg";
+import exportIcon from "../../assets/export.icon.svg";
+import {
+	handleDeleteBtn,
+	handleExportBtn,
+	handleResetBtn,
+} from "./utils/btn.handlers";
 
 /**
  * Displays photos from an album specified in the URL search params ("album" query key).
@@ -45,32 +51,6 @@ export default function Album() {
 		return <></>;
 	}
 
-	const handleResetBtn = async () => {
-		const confirm = window.confirm(
-			"Do you want to reset all of your ratings from this album?",
-		);
-
-		if (!confirm) {
-			return;
-		}
-
-		await window.ipcRenderer.resetAlbumPhotosRating(albumId);
-		window.location.reload();
-	};
-
-	const handleDeleteBtn = async () => {
-		const confirm = window.confirm(
-			"Do you want to erase all of you data, regarding this album? (photos won't be deleted!)",
-		);
-
-		if (!confirm) {
-			return;
-		}
-
-		await window.ipcRenderer.deleteAlbum(albumId);
-		navigate("/");
-	};
-
 	return (
 		<>
 			<Link to="/" className="pl-3 block">
@@ -89,7 +69,6 @@ export default function Album() {
 				>
 					<span className="text-4xl uppercase text-white">start</span>
 				</Link>
-
 				{/*Select photos*/}
 				<button
 					onClick={async () => {
@@ -105,10 +84,9 @@ export default function Album() {
 				>
 					<img src={directoryIcon} alt="open directory icon" />
 				</button>
-
 				{/* reset data button */}
 				<button
-					onClick={handleResetBtn}
+					onClick={() => handleResetBtn(albumId)}
 					className="flex items-center justify-center w-50 h-50 bg-gray-400 mt-6 flex-col cursor-pointer"
 				>
 					<img
@@ -118,10 +96,9 @@ export default function Album() {
 					/>
 					reset
 				</button>
-
 				{/* Delete data  */}
 				<button
-					onClick={handleDeleteBtn}
+					onClick={() => handleDeleteBtn(albumId, navigate)}
 					className="flex justify-center items-center h-50 w-50 size-full bg-red-500 mt-6 cursor-pointer"
 				>
 					<img
@@ -129,6 +106,18 @@ export default function Album() {
 						alt="delete icon"
 						className="max-w-20 max-h-20 size-full"
 					/>
+				</button>
+
+				<button
+					onClick={() => handleExportBtn(photos)}
+					className="flex justify-center items-center h-50 w-50 size-full bg-amber-400 mt-6 cursor-pointer flex-col"
+				>
+					<img
+						src={exportIcon}
+						alt="delete icon"
+						className="max-w-20 max-h-20 size-full"
+					/>
+					<span>export</span>
 				</button>
 
 				{photos.map(({ filePath, rating, fileName }) => (
