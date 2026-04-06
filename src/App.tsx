@@ -1,3 +1,21 @@
+import { Route } from "react-router-dom";
+import { Router } from "./lib/electron-router-dom";
+
+import Gallery from "./pages/gallery/page";
+import Judgement from "./pages/judgement/page";
+// import HomePage from "./feature/index/page";
+import Album from "./pages/album/page";
+
 export default function App() {
-	return <h1>Elo zelo</h1>;
+	return (
+		<Router
+			main={
+				<>
+					<Route path="/" element={<Gallery />}  index/>
+					<Route path="/judgement" element={<Judgement />} />
+					<Route path="/album" element={<Album />} />
+				</>
+			}
+		/>
+	);
 }
