@@ -114,8 +114,10 @@ interface Window {
 
 		/**
 		 * Resets all photos: rating, last_displayed from given album
-		 * @returns **true** on succes, **false** on failure 
+		 * @returns **true** on succes, **false** on failure
 		 */
 		resetAlbumPhotosRating(albumId: string): Promise<boolean>;
+
+		exportAlbumRatings(photos: photo[]): Promise<void>;
 	};
 }

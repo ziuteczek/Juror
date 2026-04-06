@@ -53,4 +53,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	resetAlbumPhotosRating(albumId: string) {
 		return ipcRenderer.invoke("reset-album-photos-rating", albumId);
 	},
+	async exportAlbumRatings(photos: photo[]) {
+		return await ipcRenderer.invoke("export-album-ratings", photos);
+	},
 });

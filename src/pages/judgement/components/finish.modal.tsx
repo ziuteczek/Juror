@@ -41,7 +41,12 @@ export default function FinishModal({
 				>
 					Back to the gallery
 				</Link>
-				<button className="block bg-green-500 w-full py-2 text-center cursor-pointer">
+				<button
+					className="block bg-green-500 w-full py-2 text-center cursor-pointer"
+					onClick={async () =>
+						window.ipcRenderer.exportAlbumRatings(photos)
+					}
+				>
 					Export resoults
 				</button>
 			</div>

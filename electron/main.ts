@@ -19,6 +19,8 @@ import {
 	dbResetAlbumsPhotosRatings,
 } from "./db/db";
 import { devMode } from "../src/env";
+import * as Excel from "exceljs";
+import { randomUUID } from "node:crypto";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -225,6 +227,34 @@ ipcMain.handle(
 ipcMain.handle("reset-album-photos-rating", (_, albumId: string) => {
 	const { success } = dbResetAlbumsPhotosRatings(albumId);
 	return success;
+});
+
+ipcMain.handle("export-album-ratings", async (_, photos: photo[]) => {
+	if (!win) {
+		throw new Error("Window is not initialized!");
+	}
+
+	const docsPath = app.getPath("documents");
+	const defaultPath = path.join(docsPath, randomUUID() + ".xlsx");
+
+	const { canceled, filePath } = await dialog.showSaveDialog(win, {
+		filters: [{ name: "excel file (.xlsx)", extensions: [".xlsx"] }],
+		defaultPath,
+	});
+
+	if (canceled) {
+		return;
+	}
+
+	const workbook = new Excel.Workbook();
+	const worksheet = workbook.addWorksheet();
+
+	worksheet.addRow(["name", "rating"]);
+	photos.forEach(({ fileName, rating }) => {
+		worksheet.addRow([fileName, rating]);
+	});
+
+	await workbook.xlsx.writeFile(filePath);
 });
 
 app.whenReady().then(createWindow);
