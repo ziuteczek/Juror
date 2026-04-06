@@ -14,11 +14,14 @@ import insertPhotosQuery from "./sql/insert.photos.sql?raw";
 import getPhotosQuery from "./sql/get.photos.sql?raw";
 import updatePhotoRatingQuery from "./sql/update.photo.rating.sql?raw";
 import resetAlbumPhotosRatingsQuery from "./sql/reset.album.photos.ratings.sql?raw";
+import { app } from "electron";
 
 /**
  * Initialized database
  */
-const db = new Database(dbFileName);
+const userDataDir = app.getPath("userData");
+const dbPath = path.join(userDataDir, dbFileName);
+const db = new Database(dbPath);
 db.exec(initQuery);
 
 const queries = {

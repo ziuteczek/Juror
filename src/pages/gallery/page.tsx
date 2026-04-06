@@ -32,7 +32,7 @@ export default function Gallery() {
 					/>
 				</button>
 				{galleries.toSorted().map(({ id, name }) => (
-					<AlbumThumbnail id={id} name={name} />
+					<AlbumThumbnail key={id} id={id} name={name} />
 				))}
 			</div>
 			<CreateAlbumModal

@@ -25,8 +25,8 @@ export default function AlbumThumbnail({
 	}, [id, inView]);
 
 	return (
-		<Link to={albumUrl} ref={ref} key={id}>
-			<div key={name} className="flex flex-col w-50">
+		<Link to={albumUrl} ref={ref}>
+			<div className="flex flex-col w-50">
 				<p className="font-bold text-xl truncate">{name}</p>
 				<img
 					src={thumbnail || noPhotoThumbnail}

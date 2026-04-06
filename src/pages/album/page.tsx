@@ -41,7 +41,7 @@ export default function Album() {
 
 			setPhotos(data.photos);
 
-			const { photos, ...albumData } = data;
+			const { photos: _, ...albumData } = data;
 			setAlbumData(albumData);
 		})();
 	}, [albumId]);
