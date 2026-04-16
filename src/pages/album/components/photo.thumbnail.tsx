@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Link } from "react-router-dom";
 
+/**
+ *  
+ * @returns Photo thumbnail component, that displays photo's name, photo and rating. ~It's all wrapped around a link to a single  photo rating page~. Thumbnail is loaded only when it's in the viewport.
+ */
 export default function PhotoThumbnail({
 	path,
 	rating,

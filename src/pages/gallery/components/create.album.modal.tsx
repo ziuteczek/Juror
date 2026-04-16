@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import xIcon from "../../../assets/x.icon.svg";
+import { createAlbum } from "../utils/create.album";
 
 export default function CreateAlbumModal({
 	isVisible,
@@ -27,41 +28,6 @@ export default function CreateAlbumModal({
 		}
 	}, [isVisible]);
 
-	const createAlbum = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-
-		const trimmedTitle = albumTitle.trim();
-
-		if (!trimmedTitle) {
-			alert("Album title can't be empty");
-			return;
-		}
-
-		try {
-			const newAlbumPath = await window.ipcRenderer.createAlbum(
-				trimmedTitle,
-				maxRating,
-			);
-
-			if (!newAlbumPath) {
-				alert("Failed to create album");
-				return;
-			}
-
-			alert("Album created successfully");
-
-			setAlbumTitle("");
-			setMaxRating(6);
-			closeDialog();
-
-			// Avoid full reload if possible, but keeping your logic:
-			window.location.reload();
-		} catch (err) {
-			console.error(err);
-			alert("Something went wrong");
-		}
-	};
-
 	return (
 		<dialog
 			ref={dialogRef}
@@ -81,7 +47,19 @@ export default function CreateAlbumModal({
 				<img src={xIcon} alt="exit icon" className="h-full w-full" />
 			</button>
 
-			<form className="flex flex-col gap-2" onSubmit={createAlbum}>
+			<form
+				className="flex flex-col gap-2"
+				onSubmit={(e) =>
+					createAlbum(
+						e,
+						albumTitle,
+						maxRating,
+						setAlbumTitle,
+						setMaxRating,
+						closeDialog,
+					)
+				}
+			>
 				<h1 className="text-2xl font-bold">Create new album</h1>
 
 				<label htmlFor="title" className="mt-3 text-xl">
