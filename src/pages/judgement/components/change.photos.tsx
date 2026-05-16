@@ -1,106 +1,44 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { currPhotoData } from "../types";
 
 export default function ChangePhotos({
 	currPhoto,
 	albumData,
-	setPhotos,
 	setCurrPhoto,
 }: {
 	currPhoto: currPhotoData;
 	albumData: photo[];
-	setPhotos: Dispatch<SetStateAction<photo[]>>;
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
-	// const [nextPhotoPossible, setNextPhotoPossible] = useState(false);
-	// const [prevPhotoPossible, setPrevPhotoPossible] = useState(false);
+	const [nextPhotoPossible, setNextPhotoPossible] = useState(false);
+	const [prevPhotoPossible, setPrevPhotoPossible] = useState(false);
 
 	const nextPhoto = () => {
-		if (
-			albumData.find(
-				(photo) =>
-					(photo.lastDisplayed?.getTime() ?? 0) >
-					(albumData[currPhoto.index].lastDisplayed?.getTime() ??
-						Infinity),
-			)
-		) {
-			const photosDisplayedBeforeCurrPhoto = albumData
-				.filter(
-					(photo) =>
-						(photo.lastDisplayed?.getTime() ?? 0) >
-						(albumData[
-							currPhoto.index
-						].lastDisplayed?.getTime() as number),
-				)
-				.map((photo) => photo.lastDisplayed?.getTime() as number);
-			const nextPhotolastDisplayed = Math.min(
-				...photosDisplayedBeforeCurrPhoto,
-			);
-			if (!isFinite(nextPhotolastDisplayed)) {
-				return;
-			}
-			const nextPhotoIndex = albumData.findIndex(
-				(photo) =>
-					photo.lastDisplayed?.getTime() === nextPhotolastDisplayed,
-			) as number;
-			setCurrPhoto({ index: nextPhotoIndex, photoBase64: "" });
+		if (!nextPhotoPossible) {
 			return;
 		}
 
-		setPhotos((prev) =>
-			prev.map((photo, index) =>
-				index === currPhoto.index
-					? { ...photo, lastDisplayed: new Date() }
-					: { ...photo },
-			),
-		);
-
-		setCurrPhoto({ index: -1, photoBase64: "" });
+		setCurrPhoto((oldPhoto) => ({
+			index: oldPhoto.index + 1,
+			photoBase64: "",
+		}));
 	};
 
 	const prevPhoto = () => {
-		const currentPhotoTime =
-			albumData[currPhoto.index]?.lastDisplayed?.getTime();
-
-		const photoslastDisplayed = albumData
-			.filter(
-				(photo) =>
-					(photo.lastDisplayed?.getTime() ?? Infinity) <
-					(currentPhotoTime ?? Infinity),
-			)
-			.map((photo) => photo.lastDisplayed?.getTime()) as number[];
-
-		const prevPhotolastDisplayed = Math.max(...photoslastDisplayed);
-		if (!Number.isFinite(prevPhotolastDisplayed)) {
+		if (!prevPhotoPossible) {
 			return;
 		}
-		const prevPhotoIndex = albumData.findIndex(
-			(photo) =>
-				photo.lastDisplayed?.getTime() === prevPhotolastDisplayed,
-		) as number;
 
-		setCurrPhoto({ index: prevPhotoIndex, photoBase64: "" });
+		setCurrPhoto((oldPhoto) => ({
+			index: oldPhoto.index - 1,
+			photoBase64: "",
+		}));
 	};
 
 	useEffect(() => {
-		// const isPrevPhotoPossible = albumData.some(
-		// 	(photo) =>
-		// 		photo.lastDisplayed &&
-		// 		photo.lastDisplayed.getTime() <
-		// 			(albumData[currPhoto.index].lastDisplayed?.getTime() ??
-		// 				0),
-		// );
-		// const isNextPhotoPossible = albumData.some(
-		// 	(photo) =>
-		// 		photo.rating &&
-		// 		photo.lastDisplayed &&
-		// 		photo.lastDisplayed.getTime() >
-		// 			(albumData[currPhoto.index].lastDisplayed?.getTime() ??
-		// 				0),
-		// );
-		// setPrevPhotoPossible(isPrevPhotoPossible);
-		// setNextPhotoPossible(isNextPhotoPossible);
-	}, [albumData, currPhoto]);
+		setNextPhotoPossible(albumData.length - 1 > currPhoto.index);
+		setPrevPhotoPossible(currPhoto.index > 0);
+	}, [albumData, currPhoto.index]);
 
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {
@@ -122,15 +60,15 @@ export default function ChangePhotos({
 			<div className="flex gap-3 font-bold text-white">
 				<button
 					onClick={prevPhoto}
-					disabled={false}
-					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300"
+					disabled={!prevPhotoPossible}
+					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500"
 				>
 					Last
 				</button>
 				<button
 					onClick={nextPhoto}
-					disabled={false}
-					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300"
+					disabled={!nextPhotoPossible}
+					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500"
 				>
 					Next
 				</button>

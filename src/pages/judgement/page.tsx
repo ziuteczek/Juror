@@ -104,7 +104,7 @@ export default function Judgement() {
 				<ChangePhotos
 					albumData={photos}
 					currPhoto={currPhoto}
-					setPhotos={setPhotos}
+					// setPhotos={setPhotos}
 					setCurrPhoto={setCurrPhoto}
 				/>
 				<ExitJudgement albumId={albumId} photos={photos} />

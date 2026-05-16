@@ -52,7 +52,7 @@ export default function SelectRating({
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [ratePhotoCallback]);
+	}, [maxRating,ratePhotoCallback]);
 
 	return (
 		<form className="flex flex-col gap-5 items-center">
