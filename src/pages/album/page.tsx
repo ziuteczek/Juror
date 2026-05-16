@@ -122,6 +122,7 @@ export default function Album() {
 
 				{photos.map(({ filePath, rating, fileName }) => (
 					<PhotoThumbnail
+						key={filePath}
 						path={filePath}
 						maxRating={albumData?.maxRating}
 						fileName={fileName}

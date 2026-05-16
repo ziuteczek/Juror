@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS albums (
 CREATE TABLE IF NOT EXISTS photos (
     file_path TEXT NOT NULL,
     rating REAL,
-    last_displayed DATETIME,
+    last_rated DATETIME,
     album_id TEXT NOT NULL,
     PRIMARY KEY (file_path, album_id),
     FOREIGN KEY (album_id) REFERENCES albums(id) ON DELETE CASCADE

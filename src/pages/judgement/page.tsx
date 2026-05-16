@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import FinishModal from "./components/finish.modal";
 import JudgementImage from "./components/image";
-import SelectRating from "./components/select.rating";
 import ChangePhotos from "./components/change.photos";
 import ExitJudgement from "./components/exit";
 import { currPhotoData } from "./types";
 import { getArrangedPhotos } from "./utils";
+import SelectRating from "./components/select.rating";
 
 /**
  * It's judging album given in search params under the key "album".
@@ -39,42 +39,19 @@ export default function Judgement() {
 
 	// If photo is not chosen, it selects next one
 	useEffect(() => {
-		if (currPhoto.index >= 0 || photos.length === 0) {
+		if (currPhoto.index !== -1) {
 			return;
 		}
 
-		const unratedPhotoIndex = photos.findIndex((photo) => !photo.rating);
-
-		const earliestSkippedPhotoDateEpoch = Math.min(
-			...photos
-				.filter((photo) => !photo.rating)
-				.map((photo) => photo.lastDisplayed?.getTime())
-				.filter((time): time is number => time !== undefined),
+		const firstUnratedPhotoIndex = photos.findIndex(
+			(photo) => !photo.lastRated,
 		);
 
-		const earliestSkippedPhotoIndex = photos
-			.filter((photo) => photo.lastDisplayed)
-			.findIndex(
-				(photo) =>
-					photo.lastDisplayed?.getTime() ===
-					earliestSkippedPhotoDateEpoch,
-			);
-
-		if (unratedPhotoIndex !== -1) {
-			setCurrPhoto({
-				index: unratedPhotoIndex,
-				photoBase64: "",
-			});
+		if (firstUnratedPhotoIndex === -1) {
 			return;
 		}
 
-		if (earliestSkippedPhotoIndex !== -1) {
-			setCurrPhoto({
-				index: earliestSkippedPhotoIndex,
-				photoBase64: "",
-			});
-			return;
-		}
+		setCurrPhoto({ index: firstUnratedPhotoIndex, photoBase64: "" });
 	}, [photos, currPhoto.index]);
 
 	if (!albumId) {
@@ -83,7 +60,11 @@ export default function Judgement() {
 	}
 
 	if (!photos[currPhoto.index]) {
-		return <div>Loading...</div>;
+		return (
+			<div>
+				<p>Loading</p>
+			</div>
+		);
 	}
 
 	return (

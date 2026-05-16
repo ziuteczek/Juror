@@ -17,7 +17,7 @@ interface photo {
 	filePath: string;
 	fileName: string;
 	rating: number | null;
-	lastDisplayed: Date | null;
+	lastRated: Date | null;
 }
 
 interface albumData {
@@ -115,7 +115,7 @@ interface Window {
 		updatePhotosRating(albumId: string, photos: photo[]): Promise<boolean>;
 
 		/**
-		 * Resets all photos: rating, last_displayed from given album
+		 * Resets all photos: rating, last_rated from given album
 		 * @returns **true** on succes, **false** on failure
 		 */
 		resetAlbumPhotosRating(albumId: string): Promise<boolean>;

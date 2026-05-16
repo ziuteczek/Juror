@@ -21,6 +21,7 @@ export default function SelectRating({
 					: { ...photo },
 			),
 		);
+
 	const ratePhotoCallback = useCallback(ratePhoto, [
 		currPhoto.index,
 		setPhoto,
@@ -52,7 +53,7 @@ export default function SelectRating({
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [maxRating,ratePhotoCallback]);
+	}, [maxRating, ratePhotoCallback]);
 
 	return (
 		<form className="flex flex-col gap-5 items-center">

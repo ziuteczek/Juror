@@ -1,3 +1,3 @@
 update photos
-SET rating = NULL, last_displayed = NULL
+SET rating = NULL, last_rated = NULL
 WHERE album_id = $album_id;

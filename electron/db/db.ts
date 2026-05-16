@@ -196,7 +196,7 @@ const dbUpdatePhotosRating = (
 				album_id: albumId,
 				file_path: photo.filePath,
 				rating: photo.rating,
-				last_displayed: photo.lastDisplayed?.toISOString(),
+				last_rated: photo.lastRated?.toISOString(),
 			});
 		});
 		return { success: true, data: null, error: null };
