@@ -1,5 +1,7 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
+type Override<T, K extends keyof T, V> = Omit<T, K> & Record<K, V>;
+
 //prettier-ignore
 type returnWrapper<T> ={
 	success: true,

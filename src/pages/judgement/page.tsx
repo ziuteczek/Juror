@@ -7,6 +7,7 @@ import SelectRating from "./components/select.rating";
 import ChangePhotos from "./components/change.photos";
 import ExitJudgement from "./components/exit";
 import { currPhotoData } from "./types";
+import { getArrangedPhotos } from "./utils";
 
 /**
  * It's judging album given in search params under the key "album".
@@ -31,7 +32,7 @@ export default function Judgement() {
 
 		(async () => {
 			const data = await window.ipcRenderer.getAlbum(albumId);
-			setPhotos(data.photos);
+			setPhotos(getArrangedPhotos(data.photos));
 			setMaxRating(data.maxRating);
 		})();
 	}, [albumId]);
