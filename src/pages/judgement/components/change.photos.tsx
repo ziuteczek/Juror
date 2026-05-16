@@ -61,14 +61,14 @@ export default function ChangePhotos({
 				<button
 					onClick={prevPhoto}
 					disabled={!prevPhotoPossible}
-					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500"
+					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500 disabled:cursor-not-allowed"
 				>
 					Last
 				</button>
 				<button
 					onClick={nextPhoto}
 					disabled={!nextPhotoPossible}
-					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500"
+					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500 disabled:cursor-not-allowed"
 				>
 					Next
 				</button>
