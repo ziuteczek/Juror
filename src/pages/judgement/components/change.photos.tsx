@@ -3,11 +3,11 @@ import { currPhotoData } from "../types";
 
 export default function ChangePhotos({
 	currPhoto,
-	albumData,
+	photos,
 	setCurrPhoto,
 }: {
 	currPhoto: currPhotoData;
-	albumData: photo[];
+	photos: photo[];
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
 	const [nextPhotoPossible, setNextPhotoPossible] = useState(false);
@@ -36,9 +36,9 @@ export default function ChangePhotos({
 	};
 
 	useEffect(() => {
-		setNextPhotoPossible(albumData.length - 1 > currPhoto.index);
+		setNextPhotoPossible(photos.length - 1 > currPhoto.index);
 		setPrevPhotoPossible(currPhoto.index > 0);
-	}, [albumData, currPhoto.index]);
+	}, [photos, currPhoto.index]);
 
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {

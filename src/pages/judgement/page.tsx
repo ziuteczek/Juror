@@ -39,7 +39,7 @@ export default function Judgement() {
 
 	// If photo is not chosen, it selects next one
 	useEffect(() => {
-		if (currPhoto.index !== -1) {
+		if (currPhoto.index !== -1 || !albumId) {
 			return;
 		}
 
@@ -52,7 +52,7 @@ export default function Judgement() {
 		}
 
 		setCurrPhoto({ index: firstUnratedPhotoIndex, photoBase64: "" });
-	}, [photos, currPhoto.index]);
+	}, [photos, currPhoto.index, setCurrPhoto, albumId]);
 
 	if (!albumId) {
 		naviate("/");
@@ -83,7 +83,7 @@ export default function Judgement() {
 					maxRating={maxRating}
 				/>
 				<ChangePhotos
-					albumData={photos}
+					photos={photos}
 					currPhoto={currPhoto}
 					// setPhotos={setPhotos}
 					setCurrPhoto={setCurrPhoto}
