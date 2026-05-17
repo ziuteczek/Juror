@@ -1,27 +1,36 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import type { currPhotoData } from "../types";
+import useQueue from "../hooks/queue";
 
 export default function JudgementImage({
 	currPhoto,
-	albumData,
+	photos,
 	setCurrPhoto,
 }: {
 	currPhoto: currPhotoData;
-	albumData: photo[];
+	photos: photo[];
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
-	// When new photo is picked for rating
+	const { setCurrIndex } = useQueue({
+		albumPhotos: photos,
+		starterIndex: currPhoto.index,
+	});
+
 	useEffect(() => {
-		if (currPhoto.index < 0 || !albumData[currPhoto.index]) {
+		setCurrIndex(currPhoto.index);
+	}, [currPhoto.index, setCurrIndex]);
+
+	useEffect(() => {
+		if (currPhoto.index < 0 || !photos[currPhoto.index]) {
 			return;
 		}
 
 		window.ipcRenderer
-			.photoToBase64(albumData[currPhoto.index].filePath)
+			.photoToBase64(photos[currPhoto.index].filePath)
 			.then((img) =>
 				setCurrPhoto((old) => ({ ...old, photoBase64: img })),
 			);
-	}, [albumData, currPhoto.index, setCurrPhoto]);
+	}, [photos, currPhoto.index, setCurrPhoto]);
 
 	return (
 		<img

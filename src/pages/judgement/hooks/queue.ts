@@ -1,11 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export default function useQueue(albumPhotos: photo[], starterIndex: number) {
+export default function useQueue({
+	albumPhotos,
+	starterIndex,
+}: {
+	albumPhotos: photo[];
+	starterIndex: number;
+}) {
 	const [photos, setPhotos] = useState<photo[]>(albumPhotos);
 	const [currIndex, setCurrIndex] = useState<number>(starterIndex);
 	const [data, setData] = useState<{ [key: string]: string }>({});
 
+	const dataRef = useRef(data);
+	dataRef.current = data;
+
 	useEffect(() => {
+		const data = dataRef.current;
+
 		if (currIndex < 0) {
 			setData({});
 			return;
@@ -17,32 +28,52 @@ export default function useQueue(albumPhotos: photo[], starterIndex: number) {
 
 		const firstPhotoIndexToQueue = currIndex - prevPhotosToQueue;
 		const photosToQueueCount = nextPhotosToQueue + prevPhotosToQueue;
+		const lastPhotoIndex = currIndex + photosToQueueCount;
 
-		const photosPromiseArr = Array(photosToQueueCount)
+		const photosToKeepArr = Object.keys(data)
+			.map((photoIndexStr) => Number(photoIndexStr))
+			.filter(
+				(photoIndex) =>
+					photoIndex >= firstPhotoIndexToQueue &&
+					photoIndex <= lastPhotoIndex,
+			)
+			.map((photoIndex) => [String(photoIndex), data[photoIndex]]);
+
+		const photosToKeep = Object.fromEntries(photosToKeepArr);
+
+		setData(photosToKeep);
+
+		Array(photosToQueueCount)
 			.fill(null)
-			.map(async (_, i) => {
+			.forEach(async (_, i) => {
 				const photoIndex = firstPhotoIndexToQueue + i;
 				const photoIndexStr = String(photoIndex);
 				const photoAlreadyLoaded = data[photoIndexStr];
 
-				if (photoAlreadyLoaded) {
-					return Promise.resolve(photoAlreadyLoaded);
+				if (!photos[photoIndex]?.filePath) {
+					return;
 				}
 
-				return window.ipcRenderer.photoToBase64(
+				if (photoAlreadyLoaded) {
+					return;
+				}
+
+				const photoBase64Img = await window.ipcRenderer.photoToBase64(
 					photos[photoIndex].filePath,
 				);
-			});
 
-		(async () => {
-			const photosArr = await Promise.all(photosPromiseArr);
-			const newData = photosArr.reduce((acc, photo, i) => {
-				acc[String(firstPhotoIndexToQueue + i)] = photo;
-				return acc;
-			}, data);
-			setData(newData);
-		})();
-	}, [currIndex, photos, data]);
+				setData((prev) => ({
+					...prev,
+					[photoIndexStr]: photoBase64Img,
+				}));
+
+				return;
+			});
+	}, [currIndex, photos]);
+
+	useEffect(() => {
+		console.log(data);
+	}, [data]);
 
 	const getPhotoBase64 = useCallback(
 		async (index: number) => {

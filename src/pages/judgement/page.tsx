@@ -72,7 +72,7 @@ export default function Judgement() {
 			<JudgementImage
 				setCurrPhoto={setCurrPhoto}
 				currPhoto={currPhoto}
-				albumData={photos}
+				photos={photos}
 			/>
 
 			<div className="flex-1 flex flex-col p-2 justify-center items-center">
