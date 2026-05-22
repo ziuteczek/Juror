@@ -21,8 +21,12 @@ import { app } from "electron";
  */
 const userDataDir = app.getPath("userData");
 const dbPath = path.join(userDataDir, dbFileName);
-const db = new Database(dbPath);
-db.exec(initQuery);
+
+export const db = (() => {
+	const db = new Database(dbPath);
+	db.exec(initQuery);
+	return db;
+})();
 
 const queries = {
 	createAlbum: db.prepare(createAlbumQuery),
@@ -40,7 +44,7 @@ const queries = {
  * Creates new album in the data base (create.album.sql)
  * @returns new album id
  */
-const dbCreateAlbum = (
+export const dbCreateAlbum = (
 	albumName: string,
 	maxRating: number,
 ): returnWrapper<string> => {
@@ -64,7 +68,7 @@ const dbCreateAlbum = (
  * Queries album data from database
  * @returns album data (without the photos)
  */
-const dbGetAlbumData = (albumId: string): returnWrapper<albumData> => {
+export const dbGetAlbumData = (albumId: string): returnWrapper<albumData> => {
 	try {
 		const albumData = queries.getAlbumData.get({
 			id: albumId,
@@ -82,7 +86,7 @@ const dbGetAlbumData = (albumId: string): returnWrapper<albumData> => {
  * Queries album from database
  * @returns album (with photos)
  */
-const dbGetAlbum = (albumId: string): returnWrapper<album> => {
+export const dbGetAlbum = (albumId: string): returnWrapper<album> => {
 	try {
 		const albumData = queries.getAlbumData.get({
 			id: albumId,
@@ -114,7 +118,7 @@ const dbGetAlbum = (albumId: string): returnWrapper<album> => {
 /**
  * Deletes album from database
  */
-const dbDeleteAlbum = (albumId: string): returnWrapper<null> => {
+export const dbDeleteAlbum = (albumId: string): returnWrapper<null> => {
 	try {
 		const { changes } = queries.deleteAlbumData.run({ id: albumId });
 
@@ -135,7 +139,7 @@ const dbDeleteAlbum = (albumId: string): returnWrapper<null> => {
  * Queries first photo from the album, sorted by photos id
  * @returns photo path
  */
-const dbGetThumbnailPath = (albumId: string): returnWrapper<string> => {
+export const dbGetThumbnailPath = (albumId: string): returnWrapper<string> => {
 	try {
 		const row = queries.getAlbumThumbnailPath.get({
 			album_id: albumId,
@@ -152,7 +156,7 @@ const dbGetThumbnailPath = (albumId: string): returnWrapper<string> => {
 	}
 };
 
-const dbGetAlbumsDataList = (): returnWrapper<albumData[]> => {
+export const dbGetAlbumsDataList = (): returnWrapper<albumData[]> => {
 	try {
 		const data = queries.getAlbumsDataList.all() as albumData[];
 		return { success: true, data, error: null };
@@ -164,7 +168,10 @@ const dbGetAlbumsDataList = (): returnWrapper<albumData[]> => {
 	}
 };
 
-const dbInsertPhotos = (
+/**
+ * It inserts given photos to given album in database. **It does not move the files.**
+ */
+export const dbInsertPhotos = (
 	albumId: string,
 	photosPaths: string[],
 ): returnWrapper<photo[]> => {
@@ -186,7 +193,10 @@ const dbInsertPhotos = (
 	}
 };
 
-const dbUpdatePhotosRating = (
+/**\
+ * It replaces rating and last_rated fields in the database from given path
+ */
+export const dbUpdatePhotosRating = (
 	albumId: string,
 	photos: photo[],
 ): returnWrapper<null> => {
@@ -208,7 +218,12 @@ const dbUpdatePhotosRating = (
 	}
 };
 
-const dbResetAlbumsPhotosRatings = (albumId: string): returnWrapper<null> => {
+/**
+ * Resets rating and last rated rows in all photos from given album to NULL in DB
+ */
+export const dbResetAlbumsPhotosRatings = (
+	albumId: string,
+): returnWrapper<null> => {
 	try {
 		queries.resetAlbumPhotosRatings.run({ album_id: albumId });
 		return { success: true, data: null, error: null };
@@ -218,17 +233,4 @@ const dbResetAlbumsPhotosRatings = (albumId: string): returnWrapper<null> => {
 		}
 		return { success: false, data: null, error: err };
 	}
-};
-
-export {
-	db,
-	dbCreateAlbum,
-	dbGetAlbumData,
-	dbDeleteAlbum,
-	dbGetAlbum,
-	dbGetThumbnailPath,
-	dbGetAlbumsDataList,
-	dbInsertPhotos,
-	dbUpdatePhotosRating,
-	dbResetAlbumsPhotosRatings,
 };
