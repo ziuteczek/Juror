@@ -39,7 +39,7 @@ export const handleDeleteBtn = async (
  * Exports the ratings of the given photos. If not all photos are rated, asks for confirmation before exporting.
  * @param photos Array of photos to export ratings for.
  */
-export const handleExportBtn = async (photos: photo[]) => {
+export const handleExportBtn = async (albumName:string,photos: photo[]) => {
 	const everyPhotoRated = photos.every((photo) => !!photo.rating);
 
 	if (!everyPhotoRated) {
@@ -50,5 +50,5 @@ export const handleExportBtn = async (photos: photo[]) => {
 			return;
 		}
 	}
-	await window.ipcRenderer.exportAlbumRatings(photos);
+	await window.ipcRenderer.exportAlbumRatings(albumName, photos);
 };

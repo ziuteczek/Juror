@@ -120,6 +120,6 @@ interface Window {
 		 */
 		resetAlbumPhotosRating(albumId: string): Promise<boolean>;
 
-		exportAlbumRatings(photos: photo[]): Promise<void>;
+		exportAlbumRatings(albumName: string, photos: photo[]): Promise<void>;
 	};
 }

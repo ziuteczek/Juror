@@ -20,7 +20,7 @@ import {
 } from "./db/db";
 import { devMode } from "../src/env";
 import * as Excel from "exceljs";
-import { randomUUID } from "node:crypto";
+import { writeFile } from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,10 +69,7 @@ function createWindow() {
 
 	// Test active push message to Renderer-process.
 	win.webContents.on("did-finish-load", () => {
-		win?.webContents.send(
-			"main-process-message",
-			new Date().toLocaleString(),
-		);
+		win?.webContents.send("main-process-message", new Date().toLocaleString());
 	});
 
 	if (VITE_DEV_SERVER_URL) {
@@ -205,8 +202,7 @@ ipcMain.handle(
 			async (imagePath) => await isFile(imagePath),
 		);
 
-		const missingImagesCount =
-			existingImages.length - existingImages.length;
+		const missingImagesCount = existingImages.length - existingImages.length;
 
 		if (missingImagesCount) {
 			alert(`Cound't read ${missingImagesCount} images`);
@@ -229,23 +225,15 @@ ipcMain.handle("reset-album-photos-rating", (_, albumId: string) => {
 	return success;
 });
 
-ipcMain.handle("export-album-ratings", async (_, photos: photo[]) => {
-	if (!win) {
-		throw new Error("Window is not initialized!");
-	}
+const exportRatingsJson = async (path: string, photos: photo[]) => {
+	const formatedPhotos = photos.map(({ fileName, rating }) => ({
+		name: fileName,
+		rating,
+	}));
+	await writeFile(path, JSON.stringify(formatedPhotos));
+};
 
-	const docsPath = app.getPath("documents");
-	const defaultPath = path.join(docsPath, randomUUID() + ".xlsx");
-
-	const { canceled, filePath } = await dialog.showSaveDialog(win, {
-		filters: [{ name: "excel file (.xlsx)", extensions: [".xlsx"] }],
-		defaultPath,
-	});
-
-	if (canceled) {
-		return;
-	}
-
+const exportRatingsXlsx = async (path: string, photos: photo[]) => {
 	const workbook = new Excel.Workbook();
 	const worksheet = workbook.addWorksheet();
 
@@ -254,7 +242,39 @@ ipcMain.handle("export-album-ratings", async (_, photos: photo[]) => {
 		worksheet.addRow([fileName, rating]);
 	});
 
-	await workbook.xlsx.writeFile(filePath);
-});
+	await workbook.xlsx.writeFile(path);
+};
+
+ipcMain.handle(
+	"export-album-ratings",
+	async (_, albumName: string, photos: photo[]) => {
+		if (!win) {
+			throw new Error("Window is not initialized!");
+		}
+
+		const docsPath = app.getPath("documents");
+		const defaultPath = path.join(docsPath, `${albumName}-rating`);
+
+		const { canceled, filePath } = await dialog.showSaveDialog(win, {
+			filters: [
+				{ name: "excel file (.xlsx)", extensions: ["xlsx"] },
+				{ name: "JSON", extensions: ["json"] },
+			],
+			defaultPath,
+		});
+
+		if (canceled) {
+			return;
+		}
+
+		if (filePath.toLowerCase().endsWith(".json")) {
+			exportRatingsJson(filePath, photos);
+		} else if (filePath.toLowerCase().endsWith(".xlsx")) {
+			exportRatingsXlsx(filePath, photos);
+		} else {
+			exportRatingsXlsx(filePath + ".xlsx", photos);
+		}
+	},
+);
 
 app.whenReady().then(createWindow);

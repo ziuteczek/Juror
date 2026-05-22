@@ -109,7 +109,7 @@ export default function Album() {
 				</button>
 
 				<button
-					onClick={() => handleExportBtn(photos)}
+					onClick={() => handleExportBtn(albumData.name,photos)}
 					className="flex justify-center items-center h-50 w-50 size-full bg-amber-400 mt-6 cursor-pointer flex-col"
 				>
 					<img
