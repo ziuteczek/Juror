@@ -120,6 +120,10 @@ interface Window {
 		 */
 		resetAlbumPhotosRating(albumId: string): Promise<boolean>;
 
+		/**
+		 * Exports ratings to file. Directory and extenstion selected by user (**xlsx** or **json**).
+		 * @param albumName Namoe of the album to export
+		 */
 		exportAlbumRatings(albumName: string, photos: photo[]): Promise<void>;
 	};
 }

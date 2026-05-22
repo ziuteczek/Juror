@@ -3,7 +3,6 @@ import { Router } from "./lib/electron-router-dom";
 
 import Gallery from "./pages/gallery/page";
 import Judgement from "./pages/judgement/page";
-// import HomePage from "./feature/index/page";
 import Album from "./pages/album/page";
 
 export default function App() {
