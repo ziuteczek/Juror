@@ -17,6 +17,7 @@ import {
 	dbInsertPhotos,
 	dbUpdatePhotosRating,
 	dbResetAlbumsPhotosRatings,
+	dbDeletePhoto,
 } from "./db/db";
 import { devMode } from "../src/env";
 import * as Excel from "exceljs";
@@ -169,6 +170,11 @@ ipcMain.handle("create-album", (_, albumName: string, maxRating: number) => {
 
 ipcMain.handle("delete-album", (_, albumId: string) => {
 	const { success } = dbDeleteAlbum(albumId);
+	return success;
+});
+
+ipcMain.handle("delete-photo", (_, albumId: string, photoPath: string) => {
+	const { success } = dbDeletePhoto(albumId, photoPath);
 	return success;
 });
 

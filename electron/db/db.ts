@@ -14,6 +14,7 @@ import insertPhotosQuery from "./sql/insert.photos.sql?raw";
 import getPhotosQuery from "./sql/get.photos.sql?raw";
 import updatePhotoRatingQuery from "./sql/update.photo.rating.sql?raw";
 import resetAlbumPhotosRatingsQuery from "./sql/reset.album.photos.ratings.sql?raw";
+import deletePhotoQuery from "./sql/delete.photo.sql?raw";
 import { app } from "electron";
 
 /**
@@ -38,6 +39,7 @@ const queries = {
 	insertPhotos: db.prepare(insertPhotosQuery),
 	updatePhotoRating: db.prepare(updatePhotoRatingQuery),
 	resetAlbumPhotosRatings: db.prepare(resetAlbumPhotosRatingsQuery),
+	deletePhoto: db.prepare(deletePhotoQuery),
 };
 
 /**
@@ -226,6 +228,27 @@ export const dbResetAlbumsPhotosRatings = (
 ): returnWrapper<null> => {
 	try {
 		queries.resetAlbumPhotosRatings.run({ album_id: albumId });
+		return { success: true, data: null, error: null };
+	} catch (err) {
+		if (devMode) {
+			console.error(err);
+		}
+		return { success: false, data: null, error: err };
+	}
+};
+
+export const dbDeletePhoto = (
+	albumId: string,
+	filePath: string,
+): returnWrapper<null> => {
+	try {
+		const x = queries.deletePhoto.run({
+			file_path: filePath,
+			album_id: albumId,
+		});
+		if (x.changes < 1) {
+			throw new Error("No photo was deleted");
+		}
 		return { success: true, data: null, error: null };
 	} catch (err) {
 		if (devMode) {

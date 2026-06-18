@@ -79,6 +79,12 @@ interface Window {
 		deleteAlbum(albumId: string): Promise<boolean>;
 
 		/**
+		 * Deletes photo with given path and album id from database
+		 * @returns whether photo was successfully deleted
+		 */
+		deletePhoto(albumId: string, photoPath: string): Promise<boolean>;
+
+		/**
 		 * Queries first photo from album, reads it and converts to base64 image string
 		 * @returns base64 image string, and on error empty string
 		 */

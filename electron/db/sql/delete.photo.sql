@@ -1,0 +1,1 @@
+DELETE FROM photos WHERE file_path = $file_path AND album_id = $album_id;

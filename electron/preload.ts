@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	deleteAlbum(albumId: string) {
 		return ipcRenderer.invoke("delete-album", albumId);
 	},
+	deletePhoto(albumId: string, photoPath: string) {
+		return ipcRenderer.invoke("delete-photo", albumId, photoPath);
+	},
 	getAlbumsData() {
 		return ipcRenderer.invoke("get-albums-data-list");
 	},

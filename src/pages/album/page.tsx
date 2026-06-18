@@ -144,7 +144,7 @@ export default function Album() {
 						path={filePath}
 						maxRating={albumData?.maxRating}
 						fileName={fileName}
-						// albumId={albumId}
+						albumId={albumId}
 						rating={rating}
 					/>
 				))}
