@@ -90,10 +90,17 @@ interface Window {
 		getAlbum(albumId: string): Promise<album>;
 
 		/**
-		 * Opens window allowing user to select photos with **.png**, **.jpg** and **.jpeg** extensions *(case insensitive)*
+		 * Opens window allowing user to select multiple photos with **.png**, **.jpg** and **.jpeg** extensions *(case insensitive)*
 		 * @returns absolute paths to selected photos
 		 */
 		selectImagesDialog(): Promise<string[]>;
+
+		/**
+		 * Opens window allowing user to select multiple directories with photos. Inside of this directory photos with **.png**, **.jpg** and **.jpeg** extensions *(case insensitive)* are extracted
+		 *
+		 * @returns absolute paths to the photos inside of selected directories
+		 */
+		selectDirectoriesDialog(): Promise<string[]>;
 
 		/**
 		 * Inserts **readable** images with given paths to the database

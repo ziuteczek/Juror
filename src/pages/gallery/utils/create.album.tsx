@@ -26,16 +26,16 @@ export const createAlbum = async (
 			return;
 		}
 
-		alert("Album created successfully");
+		// It breaks the app :O
+		// alert("Album created successfully");
 
 		setAlbumTitle("");
 		setMaxRating(6);
 		closeDialog();
 
-		// Avoid full reload if possible, but keeping your logic:
 		window.location.reload();
 	} catch (err) {
 		console.error(err);
-		alert("Something went wrong");
+		alert("Failed to create album");
 	}
 };

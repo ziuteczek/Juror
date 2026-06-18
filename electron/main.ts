@@ -20,7 +20,7 @@ import {
 } from "./db/db";
 import { devMode } from "../src/env";
 import * as Excel from "exceljs";
-import { writeFile } from "node:fs/promises";
+import { readdir, writeFile } from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,7 +69,10 @@ function createWindow() {
 
 	// Test active push message to Renderer-process.
 	win.webContents.on("did-finish-load", () => {
-		win?.webContents.send("main-process-message", new Date().toLocaleString());
+		win?.webContents.send(
+			"main-process-message",
+			new Date().toLocaleString(),
+		);
 	});
 
 	if (VITE_DEV_SERVER_URL) {
@@ -107,7 +110,19 @@ const isFile = async (path: string) => {
 		return false;
 	}
 };
+/**
+ * Chechs if file with given path is an image
+ *
+ * @param path path of a file to check
+ * @returns is given path an image
+ */
+const isImage = (path: string) => {
+	const fileLowerCase = path.toLowerCase();
+	const isPng = fileLowerCase.endsWith(".png");
+	const isJpg = fileLowerCase.endsWith(".jpg");
 
+	return isPng || isJpg;
+};
 /**
  * Transforms image from given path to base 64 string
  * @param photoPath PNG or JPEG photo image
@@ -182,7 +197,7 @@ ipcMain.handle("select-images", async () => {
 		throw new Error("Window is not initialized!");
 	}
 	const resoult = await dialog.showOpenDialog(win, {
-		title: "Select images or directory with images to rate",
+		title: "Select images to rate",
 		properties: ["multiSelections", "openFile"],
 		filters: [
 			{
@@ -195,6 +210,30 @@ ipcMain.handle("select-images", async () => {
 	return resoult.filePaths;
 });
 
+ipcMain.handle("select-directory", async () => {
+	if (!win) {
+		throw new Error("Window is not initialized!");
+	}
+
+	const resoult = await dialog.showOpenDialog(win, {
+		title: "Select directories with images to rate!",
+		properties: ["openDirectory", "multiSelections"],
+	});
+
+	const selectedDirs = resoult.filePaths;
+	const selectedFilesPromise = selectedDirs.map(
+		async (dir) => await readdir(dir, { encoding: "utf-8" }),
+	);
+	const selectedFiles = await Promise.all(selectedFilesPromise);
+	const selectedFilesPaths = selectedFiles.map((files, i) =>
+		files.map((file) => path.join(selectedDirs[i], file)),
+	);
+	const selectedFilesFlat = selectedFilesPaths.flat();
+	const selectedImages = selectedFilesFlat.filter((file) => isImage(file));
+
+	return selectedImages;
+});
+
 ipcMain.handle(
 	"insert-images",
 	async (_, albumId: string, imagesPaths: string[]) => {
@@ -202,7 +241,8 @@ ipcMain.handle(
 			async (imagePath) => await isFile(imagePath),
 		);
 
-		const missingImagesCount = existingImages.length - existingImages.length;
+		const missingImagesCount =
+			existingImages.length - existingImages.length;
 
 		if (missingImagesCount) {
 			alert(`Cound't read ${missingImagesCount} images`);

@@ -16,13 +16,19 @@ export default function CreateAlbumBtn() {
 				className="max-h-50 max-w-50 font-bold text-xl cursor-pointer text-left"
 			>
 				New album
-				<img src={plusIcon} alt="plus svg" className="bg-green-400 size-full" />
+				<img
+					src={plusIcon}
+					alt="plus svg"
+					className="bg-green-400 size-full"
+				/>
 			</button>
 
-			<CreateAlbumModal
-				isVisible={createAlbumVisible}
-				setIsVisible={setCreateAlbumVisible}
-			/>
+			{createAlbumVisible && (
+				<CreateAlbumModal
+					isVisible={createAlbumVisible}
+					setIsVisible={setCreateAlbumVisible}
+				/>
+			)}
 		</>
 	);
 }

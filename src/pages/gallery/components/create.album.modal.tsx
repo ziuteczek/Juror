@@ -33,7 +33,7 @@ export default function CreateAlbumModal({
 			ref={dialogRef}
 			onClose={closeDialog}
 			onCancel={(e) => {
-				e.preventDefault(); // prevent ESC from bypassing React state
+				e.preventDefault();
 				closeDialog();
 			}}
 			className="relative left-[50%] top-[50%] min-w-96 translate-x-[-50%] translate-y-[-50%] p-10 pt-14"
@@ -68,7 +68,6 @@ export default function CreateAlbumModal({
 				<input
 					type="text"
 					id="title"
-					autoFocus
 					className="block w-full border px-2 py-1"
 					value={albumTitle}
 					onChange={(e) => setAlbumTitle(e.target.value)}

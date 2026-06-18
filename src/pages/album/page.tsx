@@ -4,8 +4,9 @@ import leftArrow from "../../assets/left.arrow.icon.svg";
 import PhotoThumbnail from "./components/photo.thumbnail";
 import trashIcon from "../../assets/trash.icon.svg";
 import resetIcon from "../../assets/reset.icon.svg";
-import directoryIcon from "../../assets/directory.icon.svg";
+import addPhotoIcon from "../../assets/add.photo.icon.svg";
 import exportIcon from "../../assets/export.icon.svg";
+import addDirectoryIcon from "../../assets/add.directory.icon.svg";
 import {
 	handleDeleteBtn,
 	handleExportBtn,
@@ -82,8 +83,25 @@ export default function Album() {
 					}}
 					className="flex items-center justify-center w-50 h-50 bg-yellow-600 mt-6 flex-col cursor-pointer"
 				>
-					<img src={directoryIcon} alt="open directory icon" />
+					<img src={addPhotoIcon} alt="open directory icon" />
 				</button>
+
+				{/*Select directory*/}
+				<button
+					onClick={async () => {
+						const imagesPaths =
+							await window.ipcRenderer.selectDirectoriesDialog();
+						await window.ipcRenderer.insertImages(
+							albumId,
+							imagesPaths,
+						);
+						window.location.reload();
+					}}
+					className="flex items-center justify-center w-50 h-50 bg-blue-600 mt-6 flex-col cursor-pointer"
+				>
+					<img src={addDirectoryIcon} alt="open directory icon" />
+				</button>
+
 				{/* reset data button */}
 				<button
 					onClick={() => handleResetBtn(albumId)}
@@ -109,7 +127,7 @@ export default function Album() {
 				</button>
 
 				<button
-					onClick={() => handleExportBtn(albumData.name,photos)}
+					onClick={() => handleExportBtn(albumData.name, photos)}
 					className="flex justify-center items-center h-50 w-50 size-full bg-amber-400 mt-6 cursor-pointer flex-col"
 				>
 					<img

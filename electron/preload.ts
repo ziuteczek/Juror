@@ -44,6 +44,9 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	selectImagesDialog() {
 		return ipcRenderer.invoke("select-images");
 	},
+	selectDirectoriesDialog() {
+		return ipcRenderer.invoke("select-directory");
+	},
 	insertImages(albumId: string, imagesPaths: string[]) {
 		return ipcRenderer.invoke("insert-images", albumId, imagesPaths);
 	},
@@ -54,6 +57,10 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 		return ipcRenderer.invoke("reset-album-photos-rating", albumId);
 	},
 	async exportAlbumRatings(albumName: string, photos: photo[]) {
-		return await ipcRenderer.invoke("export-album-ratings", albumName, photos);
+		return await ipcRenderer.invoke(
+			"export-album-ratings",
+			albumName,
+			photos,
+		);
 	},
 });
