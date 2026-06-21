@@ -31,6 +31,11 @@ interface album extends albumData {
 	photos: photo[];
 }
 
+interface exportedAlbumRatings {
+	name: string;
+	rating: number | null;
+}
+
 declare namespace NodeJS {
 	interface ProcessEnv {
 		/**
@@ -138,5 +143,7 @@ interface Window {
 		 * @param albumName Namoe of the album to export
 		 */
 		exportAlbumRatings(albumName: string, photos: photo[]): Promise<void>;
+
+		mergeAlbumRatings(): Promise<void>;
 	};
 }

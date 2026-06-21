@@ -59,6 +59,9 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 	resetAlbumPhotosRating(albumId: string) {
 		return ipcRenderer.invoke("reset-album-photos-rating", albumId);
 	},
+	mergeAlbumRatings() {
+		return ipcRenderer.invoke("merge-album-ratings")
+	},
 	async exportAlbumRatings(albumName: string, photos: photo[]) {
 		return await ipcRenderer.invoke(
 			"export-album-ratings",

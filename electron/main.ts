@@ -3,7 +3,7 @@ import "dotenv/config";
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import path from "node:path";
+import path, { extname } from "node:path";
 import { readFile } from "fs/promises";
 import { registerRoute } from "../src/lib/electron-router-dom";
 import {
@@ -272,13 +272,16 @@ ipcMain.handle("reset-album-photos-rating", (_, albumId: string) => {
 });
 
 const exportRatingsJson = async (path: string, photos: photo[]) => {
-	const formatedPhotos = photos.map(({ fileName, rating }) => ({
-		name: fileName,
-		rating,
-	}));
-	await writeFile(path, JSON.stringify(formatedPhotos));
+	const formatedPhotos: exportedAlbumRatings[] = photos.map(
+		({ fileName, rating }) => ({
+			name: fileName,
+			rating,
+		}),
+	);
+	await writeFile(path, JSON.stringify(formatedPhotos), "utf-8");
 };
 
+/*
 const exportRatingsXlsx = async (path: string, photos: photo[]) => {
 	const workbook = new Excel.Workbook();
 	const worksheet = workbook.addWorksheet();
@@ -290,6 +293,7 @@ const exportRatingsXlsx = async (path: string, photos: photo[]) => {
 
 	await workbook.xlsx.writeFile(path);
 };
+*/
 
 ipcMain.handle(
 	"export-album-ratings",
@@ -299,28 +303,127 @@ ipcMain.handle(
 		}
 
 		const docsPath = app.getPath("documents");
-		const defaultPath = path.join(docsPath, `${albumName}-rating`);
+		const defaultPath = path.join(docsPath, `${albumName}-rating.json`);
 
 		const { canceled, filePath } = await dialog.showSaveDialog(win, {
-			filters: [
-				{ name: "excel file (.xlsx)", extensions: ["xlsx"] },
-				{ name: "JSON", extensions: ["json"] },
-			],
+			filters: [{ name: "JSON", extensions: ["json"] }],
+			properties: ["createDirectory"],
 			defaultPath,
 		});
 
-		if (canceled) {
+		if (canceled || !filePath) {
 			return;
 		}
 
-		if (filePath.toLowerCase().endsWith(".json")) {
-			exportRatingsJson(filePath, photos);
-		} else if (filePath.toLowerCase().endsWith(".xlsx")) {
-			exportRatingsXlsx(filePath, photos);
-		} else {
-			exportRatingsXlsx(filePath + ".xlsx", photos);
-		}
+		const ext = extname(filePath).toLowerCase();
+
+		const filePathExt = (() => {
+			if (!ext) {
+				return filePath + ".json";
+			} else if (ext !== ".json") {
+				const parsedPath = path.parse(filePath);
+				return path.join(parsedPath.dir, parsedPath.name) + ".json";
+			} else {
+				return filePath;
+			}
+		})();
+
+		await exportRatingsJson(filePathExt, photos);
 	},
 );
+
+ipcMain.handle("merge-album-ratings", async () => {
+	if (!win) {
+		throw new Error("Window is not initialized!");
+	}
+
+	const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+		message: "Select ratings files to merge",
+		title: "Select ratings files to merge",
+		properties: ["multiSelections", "openFile"],
+		filters: [{ name: "JSON", extensions: ["json"] }],
+	});
+
+	if (canceled) {
+		alert("Selecting has been canceled");
+		return;
+	}
+
+	const filePathsJson = filePaths.filter((path) =>
+		path.toLowerCase().endsWith(".json"),
+	);
+
+	const dataStrPromise = filePathsJson.map(
+		async (path) => await readFile(path, "utf-8"),
+	);
+	const dataStr = await Promise.all(dataStrPromise);
+
+	const ratings = dataStr.map((str, i) => ({
+		name: path.basename(filePathsJson[i]),
+		data: JSON.parse(str) as exportedAlbumRatings[],
+	}));
+
+	const docsPath = app.getPath("documents");
+	const defaultPath = path.join(docsPath, "merged-album-ratings.xlsx");
+
+	const { canceled: saveCanceled, filePath } = await dialog.showSaveDialog(
+		win,
+		{
+			title: "Export merged ratings",
+			message: "Choose where to save merged ratings",
+			filters: [{ name: "excel file (.xlsx)", extensions: ["xlsx"] }],
+			defaultPath,
+		},
+	);
+
+	if (saveCanceled || !filePath) {
+		return;
+	}
+
+	const workbook = new Excel.Workbook();
+	const worksheet = workbook.addWorksheet("ratings");
+	const ratingNames = ratings.map(({ name }) => name);
+	const photoRatings = new Map<
+		string,
+		Record<string, exportedAlbumRatings["rating"]>
+	>();
+
+	for (const { name, data } of ratings) {
+		for (const { name: photoName, rating } of data) {
+			const existingRatings = photoRatings.get(photoName) ?? {};
+			existingRatings[name] = rating;
+			photoRatings.set(photoName, existingRatings);
+		}
+	}
+
+	worksheet.addRow(["name", ...ratingNames, "average"]);
+
+	for (const [photoName, ratingsByFile] of photoRatings.entries()) {
+		const rowRatings = ratingNames.map(
+			(ratingName) => ratingsByFile[ratingName] ?? "",
+		);
+		const numericRatings = rowRatings.filter(
+			(rating): rating is number => typeof rating === "number",
+		);
+		const averageRating = numericRatings.length
+			? Math.round(
+					(numericRatings.reduce((sum, rating) => sum + rating, 0) /
+						numericRatings.length) * 10,
+				) / 10
+			: "";
+
+		worksheet.addRow([
+			photoName,
+			...rowRatings,
+			averageRating,
+		]);
+	}
+
+	await workbook.xlsx.writeFile(
+		filePath.toLowerCase().endsWith(".xlsx")
+			? filePath
+			: filePath + ".xlsx",
+	);
+});
 
 app.whenReady().then(createWindow);
