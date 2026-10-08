@@ -20,23 +20,40 @@ export default function JudgementImage({
 		setCurrIndex(currPhoto.index);
 	}, [currPhoto.index, setCurrIndex]);
 
+	const filePath = photos[currPhoto.index]?.filePath;
+
 	useEffect(() => {
-		if (currPhoto.index < 0 || !photos[currPhoto.index]) {
+		if (!filePath) {
 			return;
 		}
 
-		window.ipcRenderer
-			.photoToBase64(photos[currPhoto.index].filePath)
-			.then((img) =>
-				setCurrPhoto((old) => ({ ...old, photoBase64: img })),
-			);
-	}, [photos, currPhoto.index, setCurrPhoto]);
+		// Ignore results of photos that are no longer current (e.g. user skipped quickly)
+		let cancelled = false;
+
+		window.ipcRenderer.photoToBase64(filePath).then((img) => {
+			if (!cancelled) {
+				setCurrPhoto((old) => ({ ...old, photoBase64: img }));
+			}
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [filePath, setCurrPhoto]);
+
+	if (!currPhoto.photoBase64) {
+		return (
+			<div className="grid size-full place-items-center">
+				<span className="size-6 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
+			</div>
+		);
+	}
 
 	return (
 		<img
 			src={currPhoto.photoBase64}
-			alt={"Photo to judge"}
-			className="object-contain max-h-svh max-w-[90svw]"
+			alt="Photo to judge"
+			className="size-full object-contain"
 		/>
 	);
 }

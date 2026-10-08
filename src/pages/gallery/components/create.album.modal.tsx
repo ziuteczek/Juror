@@ -1,99 +1,144 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import xIcon from "../../../assets/x.icon.svg";
-import { createAlbum } from "../utils/create.album";
+import { FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Modal from "../../../components/modal";
+import Button from "../../../components/button";
+import { XIcon } from "../../../components/icons";
 
-export default function CreateAlbumModal({
-	isVisible,
-	setIsVisible,
-}: {
-	isVisible: boolean;
-	setIsVisible: Dispatch<SetStateAction<boolean>>;
-}) {
+const MIN_RATING = 2;
+const MAX_RATING = 10;
+const DEFAULT_RATING = 6;
+
+/**
+ * Form for creating a new album. After creating, user is navigated to the new album.
+ */
+export default function CreateAlbumModal({ onClose }: { onClose: () => void }) {
 	const [albumTitle, setAlbumTitle] = useState("");
-	const [maxRating, setMaxRating] = useState(6);
-	const dialogRef = useRef<HTMLDialogElement | null>(null);
+	const [maxRating, setMaxRating] = useState(DEFAULT_RATING);
+	const [error, setError] = useState("");
+	const [submitting, setSubmitting] = useState(false);
+	const navigate = useNavigate();
 
-	const closeDialog = () => {
-		setIsVisible(false);
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+
+		const trimmedTitle = albumTitle.trim();
+
+		if (!trimmedTitle) {
+			setError("Album name can't be empty.");
+			return;
+		}
+
+		setSubmitting(true);
+		try {
+			const newAlbumId = await window.ipcRenderer.createAlbum(
+				trimmedTitle,
+				maxRating,
+			);
+
+			if (!newAlbumId) {
+				setError(
+					"Couldn't create the album. An album with this name may already exist.",
+				);
+				return;
+			}
+
+			navigate(`/album?album=${newAlbumId}`);
+		} catch (err) {
+			console.error(err);
+			setError("Couldn't create the album.");
+		} finally {
+			setSubmitting(false);
+		}
 	};
 
-	useEffect(() => {
-		const dialog = dialogRef.current;
-		if (!dialog) return;
-
-		if (isVisible) {
-			if (!dialog.open) dialog.showModal();
-		} else {
-			if (dialog.open) dialog.close();
-		}
-	}, [isVisible]);
+	const ratings = Array.from(
+		{ length: MAX_RATING - MIN_RATING + 1 },
+		(_, i) => MIN_RATING + i,
+	);
 
 	return (
-		<dialog
-			ref={dialogRef}
-			onClose={closeDialog}
-			onCancel={(e) => {
-				e.preventDefault();
-				closeDialog();
-			}}
-			className="relative left-[50%] top-[50%] min-w-96 translate-x-[-50%] translate-y-[-50%] p-10 pt-14"
-		>
-			{/* exit btn */}
-			<button
-				type="button"
-				onClick={closeDialog}
-				className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center"
-			>
-				<img src={xIcon} alt="exit icon" className="h-full w-full" />
-			</button>
+		<Modal open onClose={onClose} labelledBy="create-album-title">
+			<div className="flex items-start justify-between gap-4">
+				<div>
+					<h2 id="create-album-title" className="text-lg font-semibold">
+						New album
+					</h2>
+					<p className="mt-1 text-sm text-zinc-500">
+						Pick a name and the rating scale for its photos.
+					</p>
+				</div>
+				<Button
+					variant="ghost"
+					size="icon"
+					onClick={onClose}
+					aria-label="Close"
+					className="-mr-2 -mt-1"
+				>
+					<XIcon />
+				</Button>
+			</div>
 
-			<form
-				className="flex flex-col gap-2"
-				onSubmit={(e) =>
-					createAlbum(
-						e,
-						albumTitle,
-						maxRating,
-						setAlbumTitle,
-						setMaxRating,
-						closeDialog,
-					)
-				}
-			>
-				<h1 className="text-2xl font-bold">Create new album</h1>
-
-				<label htmlFor="title" className="mt-3 text-xl">
-					Album title
-				</label>
-				<input
-					type="text"
-					id="title"
-					className="block w-full border px-2 py-1"
-					value={albumTitle}
-					onChange={(e) => setAlbumTitle(e.target.value)}
-				/>
-
-				<label htmlFor="max-rating">Max rating</label>
-				<div className="flex items-center gap-2">
+			<form className="mt-6 flex flex-col gap-5" onSubmit={handleSubmit}>
+				<div className="flex flex-col gap-1.5">
+					<label htmlFor="album-title" className="text-sm font-medium">
+						Name
+					</label>
 					<input
-						type="range"
-						id="max-rating"
-						min={2}
-						max={10}
-						value={maxRating}
-						className="flex-1"
-						onChange={(e) => setMaxRating(Number(e.target.value))}
+						type="text"
+						id="album-title"
+						autoFocus
+						placeholder="e.g. Summer 2026"
+						className="h-10 rounded-lg border border-zinc-300 bg-white px-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-accent focus:ring-3 focus:ring-accent-soft"
+						value={albumTitle}
+						onChange={(e) => {
+							setAlbumTitle(e.target.value);
+							setError("");
+						}}
 					/>
-					<span className="text-2xl font-bold">{maxRating}</span>
 				</div>
 
-				<button
-					type="submit"
-					className="mt-3 cursor-pointer bg-blue-500 text-2xl text-white"
-				>
-					Create
-				</button>
+				<fieldset className="flex flex-col gap-1.5">
+					<legend className="mb-1.5 text-sm font-medium">
+						Rating scale{" "}
+						<span className="font-normal text-zinc-500">
+							(1 – {maxRating})
+						</span>
+					</legend>
+					<div className="grid grid-cols-9 gap-1 rounded-lg bg-zinc-100 p-1">
+						{ratings.map((rating) => {
+							const selected = rating === maxRating;
+							return (
+								<button
+									key={rating}
+									type="button"
+									aria-pressed={selected}
+									onClick={() => setMaxRating(rating)}
+									className={`h-8 cursor-pointer rounded-md text-sm font-medium tabular-nums transition-colors ${
+										selected
+											? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-200"
+											: "text-zinc-500 hover:text-zinc-900"
+									}`}
+								>
+									{rating}
+								</button>
+							);
+						})}
+					</div>
+				</fieldset>
+
+				{error && (
+					<p role="alert" className="text-sm text-red-600">
+						{error}
+					</p>
+				)}
+
+				<div className="mt-1 flex justify-end gap-2">
+					<Button onClick={onClose}>Cancel</Button>
+					<Button type="submit" variant="primary" disabled={submitting}>
+						Create album
+					</Button>
+				</div>
 			</form>
-		</dialog>
+		</Modal>
 	);
 }

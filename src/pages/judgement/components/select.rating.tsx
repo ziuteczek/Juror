@@ -1,6 +1,7 @@
-import { Fragment } from "react/jsx-runtime";
 import { currPhotoData } from "../types";
-import { Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import { Dispatch, SetStateAction, useCallback } from "react";
+import Button from "../../../components/button";
+import RatingPicker from "../../../components/rating.picker";
 
 export default function SelectRating({
 	photos,
@@ -13,83 +14,45 @@ export default function SelectRating({
 	maxRating: number;
 	setPhoto: Dispatch<SetStateAction<photo[]>>;
 }) {
-	const ratePhoto = (rating: number | null) =>
-		setPhoto((prev) =>
-			prev.map((photo, photoIndex) =>
-				photoIndex === currPhoto.index
-					? { ...photo, rating }
-					: { ...photo },
+	const ratePhoto = useCallback(
+		(rating: number | null) =>
+			setPhoto((prev) =>
+				prev.map((photo, photoIndex) =>
+					photoIndex === currPhoto.index ? { ...photo, rating } : photo,
+				),
 			),
-		);
+		[currPhoto.index, setPhoto],
+	);
 
-	const ratePhotoCallback = useCallback(ratePhoto, [
-		currPhoto.index,
-		setPhoto,
-	]);
-
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			const keyCode = e.code;
-			const digitKeyword = "Digit";
-
-			if (!keyCode.startsWith(digitKeyword)) {
-				return;
-			}
-
-			const numPressedStr = keyCode.replace(digitKeyword, "");
-			const numPressed = Number(numPressedStr);
-
-			if (isNaN(numPressed)) {
-				return;
-			}
-
-			if (numPressed >= 1 && numPressed <= maxRating) {
-				ratePhotoCallback(numPressed);
-			}
-		};
-
-		document.addEventListener("keydown", handleKeyDown);
-
-		return () => {
-			document.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [maxRating, ratePhotoCallback]);
+	const currentRating = photos[currPhoto.index]?.rating ?? null;
 
 	return (
-		<form className="flex flex-col gap-5 items-center">
-			{Array.from({ length: maxRating }, (_, i) => {
-				const isSelected = photos[currPhoto.index].rating === i + 1;
-				return (
-					<Fragment key={i}>
-						<label
-							htmlFor={`${i + 1}`}
-							className={`font-bold text-4xl cursor-pointer transition-colors duration-150 ${
-								isSelected
-									? "text-sky-700 hover:text-sky-700"
-									: "hover:text-gray-600"
-							}`}
-						>
-							{i + 1}
-						</label>
-						<input
-							type="radio"
-							name="rating"
-							id={`${i + 1}`}
-							value={i + 1}
-							checked={isSelected}
-							onChange={() => ratePhotoCallback(i + 1)}
-							className="hidden"
-						/>
-					</Fragment>
-				);
-			})}
-			<button
-				type="reset"
-				className="-mt-5 text-gray-700 py-2 text-lg cursor-pointer"
-				onClick={() => ratePhotoCallback(null)}
+		<div>
+			<div className="flex items-baseline justify-between">
+				<h2 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+					Rating
+				</h2>
+				<span className="text-sm tabular-nums text-zinc-500">
+					{currentRating === null ? "—" : currentRating} / {maxRating}
+				</span>
+			</div>
+
+			<RatingPicker
+				value={currentRating}
+				max={maxRating}
+				onChange={ratePhoto}
+				className="mt-3 grid grid-cols-5 gap-2"
+			/>
+
+			<Button
+				variant="ghost"
+				size="sm"
+				className="mt-3 -ml-3"
+				disabled={currentRating === null}
+				onClick={() => ratePhoto(null)}
 			>
-				reset
-			</button>
-		</form>
+				Clear rating
+			</Button>
+		</div>
 	);
 }

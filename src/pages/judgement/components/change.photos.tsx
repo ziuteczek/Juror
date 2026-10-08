@@ -1,5 +1,7 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { currPhotoData } from "../types";
+import Button from "../../../components/button";
+import { ChevronLeftIcon, ChevronRightIcon } from "../../../components/icons";
 
 export default function ChangePhotos({
 	currPhoto,
@@ -10,8 +12,8 @@ export default function ChangePhotos({
 	photos: photo[];
 	setCurrPhoto: Dispatch<SetStateAction<currPhotoData>>;
 }) {
-	const [nextPhotoPossible, setNextPhotoPossible] = useState(false);
-	const [prevPhotoPossible, setPrevPhotoPossible] = useState(false);
+	const nextPhotoPossible = photos.length - 1 > currPhoto.index;
+	const prevPhotoPossible = currPhoto.index > 0;
 
 	const nextPhoto = () => {
 		if (!nextPhotoPossible) {
@@ -36,17 +38,20 @@ export default function ChangePhotos({
 	};
 
 	useEffect(() => {
-		setNextPhotoPossible(photos.length - 1 > currPhoto.index);
-		setPrevPhotoPossible(currPhoto.index > 0);
-	}, [photos, currPhoto.index]);
-
-	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {
-			if (e.code !== "Enter") {
+			// Let modal buttons handle their own keys
+			if (e.target instanceof Element && e.target.closest("dialog")) {
 				return;
 			}
 
-			nextPhoto();
+			if (e.code === "Enter" || e.code === "ArrowRight") {
+				// Prevents a focused button from also handling Enter (double skip)
+				e.preventDefault();
+				nextPhoto();
+			} else if (e.code === "ArrowLeft") {
+				e.preventDefault();
+				prevPhoto();
+			}
 		};
 
 		document.addEventListener("keydown", handleKeyPress);
@@ -55,24 +60,17 @@ export default function ChangePhotos({
 			document.removeEventListener("keydown", handleKeyPress);
 		};
 	});
+
 	return (
-		<div className="flex items-center justify-center">
-			<div className="flex gap-3 font-bold text-white">
-				<button
-					onClick={prevPhoto}
-					disabled={!prevPhotoPossible}
-					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500 disabled:cursor-not-allowed"
-				>
-					Last
-				</button>
-				<button
-					onClick={nextPhoto}
-					disabled={!nextPhotoPossible}
-					className="px-4 py-2 text-lg uppercase bg-sky-600 hover:bg-sky-800 cursor-pointer transition-colors duration-300 disabled:bg-stone-500 disabled:cursor-not-allowed"
-				>
-					Next
-				</button>
-			</div>
+		<div className="grid grid-cols-2 gap-2">
+			<Button onClick={prevPhoto} disabled={!prevPhotoPossible}>
+				<ChevronLeftIcon />
+				Previous
+			</Button>
+			<Button onClick={nextPhoto} disabled={!nextPhotoPossible}>
+				Next
+				<ChevronRightIcon />
+			</Button>
 		</div>
 	);
 }

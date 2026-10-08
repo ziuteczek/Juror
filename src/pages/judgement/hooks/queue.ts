@@ -71,10 +71,6 @@ export default function useQueue({
 			});
 	}, [currIndex, photos]);
 
-	useEffect(() => {
-		console.log(data);
-	}, [data]);
-
 	const getPhotoBase64 = useCallback(
 		async (index: number) => {
 			const indexStr = String(index);
