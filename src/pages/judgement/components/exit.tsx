@@ -1,6 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
-import exitIcon from "../../../assets/exit.icon.svg";
+import { useNavigate } from "react-router-dom";
+import Button from "../../../components/button";
+import { ArrowLeftIcon } from "../../../components/icons";
 
+/**
+ * Saves ratings and goes back to the album page.
+ */
 export default function ExitJudgement({
 	albumId,
 	photos,
@@ -10,21 +14,15 @@ export default function ExitJudgement({
 }) {
 	const navigate = useNavigate();
 
-	const saveData = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-		e.preventDefault();
-		(async () => {
-			await window.ipcRenderer.updatePhotosRating(albumId, photos);
-			navigate(`/album?album=${albumId}`);
-		})();
+	const saveAndExit = async () => {
+		await window.ipcRenderer.updatePhotosRating(albumId, photos);
+		navigate(`/album?album=${albumId}`);
 	};
 
 	return (
-		<Link to={"/"} onClick={saveData}>
-			<img
-				src={exitIcon}
-				alt=""
-				className="max-w-20 max-h-20 size-full"
-			/>
-		</Link>
+		<Button variant="ghost" size="sm" className="-ml-3" onClick={saveAndExit}>
+			<ArrowLeftIcon />
+			Save &amp; exit
+		</Button>
 	);
 }

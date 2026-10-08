@@ -1,19 +1,19 @@
 import { NavigateFunction } from "react-router-dom";
 
 /**
- * Resets all of the ratings from the album with given id. Asks for confirmation before doing so. After resetting, page is reloaded to show changes.
+ * Resets all of the ratings from the album with given id. Asks for confirmation before doing so.
+ * @returns whether ratings were reset (caller should reload album data)
  */
 export const handleResetBtn = async (albumId: string) => {
 	const confirm = window.confirm(
-		"Do you want to reset all of your ratings from this album?",
+		"Reset all ratings in this album? This can't be undone.",
 	);
 
 	if (!confirm) {
-		return;
+		return false;
 	}
 
-	await window.ipcRenderer.resetAlbumPhotosRating(albumId);
-	window.location.reload();
+	return await window.ipcRenderer.resetAlbumPhotosRating(albumId);
 };
 
 /**
@@ -24,7 +24,7 @@ export const handleDeleteBtn = async (
 	navigate: NavigateFunction,
 ) => {
 	const confirm = window.confirm(
-		"Do you want to erase all of you data, regarding this album? (photos won't be deleted!)",
+		"Delete this album and all of its ratings? Your photo files won't be deleted.",
 	);
 
 	if (!confirm) {
@@ -39,12 +39,12 @@ export const handleDeleteBtn = async (
  * Exports the ratings of the given photos. If not all photos are rated, asks for confirmation before exporting.
  * @param photos Array of photos to export ratings for.
  */
-export const handleExportBtn = async (albumName:string,photos: photo[]) => {
+export const handleExportBtn = async (albumName: string, photos: photo[]) => {
 	const everyPhotoRated = photos.every((photo) => !!photo.rating);
 
 	if (!everyPhotoRated) {
 		const confirm = window.confirm(
-			"You didn't rate all of your photos. Do you want to export anyway?",
+			"Not all photos are rated yet. Export anyway?",
 		);
 		if (!confirm) {
 			return;

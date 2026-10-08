@@ -1,57 +1,71 @@
 import { Link } from "react-router-dom";
-import flowers from "../../../assets/flowers.svg";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import Modal from "../../../components/modal";
+import Button from "../../../components/button";
+import { buttonClass } from "../../../components/button.styles";
+import { CheckIcon, DownloadIcon } from "../../../components/icons";
+
+/**
+ * Shown once every photo has a rating. Ratings are saved whenever they change while all photos are rated.
+ */
 export default function FinishModal({
 	albumId,
+	albumName,
 	photos,
 }: {
 	albumId: string;
+	albumName: string;
 	photos: photo[];
 }) {
-	const end = photos.every((photo) => !!photo.rating);
-	const dialogRef = useRef<HTMLDialogElement | null>(null);
+	const end = photos.length > 0 && photos.every((photo) => !!photo.rating);
+	const [dismissed, setDismissed] = useState(false);
 
 	useEffect(() => {
-		const dialogEl = dialogRef.current;
-
 		if (end) {
 			window.ipcRenderer.updatePhotosRating(albumId, photos);
-			dialogEl?.showModal();
 		} else {
-			dialogEl?.close();
+			// Show the modal again next time every photo gets rated
+			setDismissed(false);
 		}
 	}, [end, albumId, photos]);
 
 	return (
-		<dialog
-			ref={dialogRef}
-			className="left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] pb-25 px-50 border"
+		<Modal
+			open={end && !dismissed}
+			onClose={() => setDismissed(true)}
+			labelledBy="finish-title"
+			width="max-w-sm"
+			className="text-center"
 		>
-			<h1 className="pt-15 text-center text-5xl">You finished!</h1>
-			<img
-				src={flowers}
-				className="max-w-100 max-h-100 size-full pt-10"
-				alt="flowers"
-			/>
-			<p className="text-lg text-center">
-				You finished rating all of your {photos.length} photos
+			<div className="mx-auto grid size-12 place-items-center rounded-full bg-accent-soft text-accent">
+				<CheckIcon className="size-6" />
+			</div>
+			<h2 id="finish-title" className="mt-4 text-lg font-semibold">
+				All photos rated
+			</h2>
+			<p className="mt-1 text-sm text-zinc-500">
+				You rated all {photos.length} photos in{" "}
+				<span className="font-medium text-zinc-700">{albumName}</span>.
+				Your ratings are saved.
 			</p>
-			<div className="flex flex-col items-center gap-2">
-				<Link
-					to={"/"}
-					className="block bg-blue-500 w-full py-2 text-center text-white "
-				>
-					Back to the gallery
-				</Link>
-				<button
-					className="block bg-green-500 w-full py-2 text-center cursor-pointer"
-					onClick={async () =>
-						window.ipcRenderer.exportAlbumRatings(albumId, photos)
+
+			<div className="mt-6 flex flex-col gap-2">
+				<Button
+					variant="primary"
+					onClick={() =>
+						window.ipcRenderer.exportAlbumRatings(albumName, photos)
 					}
 				>
-					Export resoults
-				</button>
+					<DownloadIcon />
+					Export ratings
+				</Button>
+				<Link to={`/album?album=${albumId}`} className={buttonClass()}>
+					Back to album
+				</Link>
+				<Button variant="ghost" onClick={() => setDismissed(true)}>
+					Keep reviewing
+				</Button>
 			</div>
-		</dialog>
+		</Modal>
 	);
 }
